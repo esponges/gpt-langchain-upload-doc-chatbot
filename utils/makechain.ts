@@ -1,6 +1,12 @@
 import { OpenAI } from 'langchain/llms/openai';
-import { PineconeStore } from 'langchain/vectorstores/pinecone';
+// import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { ConversationalRetrievalQAChain } from 'langchain/chains';
+
+import { HNSWLib } from "langchain/vectorstores/hnswlib";
+import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import * as fs from "fs";
+import path from "path";
 
 const CONDENSE_PROMPT = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
 
@@ -18,15 +24,27 @@ If the question is not related to the context, politely respond that you are tun
 Question: {question}
 Helpful answer in markdown:`;
 
-export const makeChain = (vectorstore: PineconeStore) => {
+export const makeChain = async () => {
   const model = new OpenAI({
     temperature: 0, // increase temepreature to get more creative answers
     modelName: 'gpt-3.5-turbo', //change this to gpt-4 if you have access
+    openAIApiKey: process.env.OPENAI_API_KEY,
   });
+
+  /* Load in the file we want to do question answering over */
+  // const text = fs.readFileSync(path.join(__dirname, 'magic-lotr.txt'), 'utf8');
+  // const text = fs.readFileSync("magic-lotr.txt", "utf8");
+  const filePath = path.join(process.cwd(), 'public', 'magic-lotr.txt');
+  const text = fs.readFileSync(filePath, 'utf8');
+  /* Split the text into chunks */
+  const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
+  const docs = await textSplitter.createDocuments([text]);
+  /* Create the vectorstore */
+  const vectorStore = await HNSWLib.fromDocuments(docs, new OpenAIEmbeddings());
 
   const chain = ConversationalRetrievalQAChain.fromLLM(
     model,
-    vectorstore.asRetriever(),
+    vectorStore.asRetriever(),
     {
       qaTemplate: QA_PROMPT,
       questionGeneratorTemplate: CONDENSE_PROMPT,
@@ -35,3 +53,9 @@ export const makeChain = (vectorstore: PineconeStore) => {
   );
   return chain;
 };
+
+// the actual folder structure is:
+// utils
+//   makechain.ts
+//   pinecone-client.ts
+//   magic-lotr.txt
