@@ -70,15 +70,26 @@ export default function Home() {
     setQuery('');
 
     try {
+      // append the file to the form data
+      const formData = new FormData();
+      if (uploadedFile) {
+        formData.append('file', uploadedFile);
+      }
+      // also append question and history
+      // formData.append('question', question);
+      // formData.append('history', JSON.stringify(history));
+      formData.append('question', 'f');
+      formData.append('history', '[]');
+
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          question,
-          history,
-        }),
+        // headers: {
+        //   'Content-Type': 'application/json',
+        // },
+        // headers: {
+        //   'Content-Type': 'multipart/form-data',
+        // },
+        body: formData,
       });
       const data = await response.json();
       console.log('data', data);
@@ -187,8 +198,8 @@ export default function Home() {
                         : styles.usermessage;
                   }
                   return (
-                    <>
-                      <div key={`chatMessage-${index}`} className={className}>
+                    <div key={`chatMessage-${index}`} className={className}>
+                      <div>
                         {icon}
                         <div className={styles.markdownanswer}>
                           <ReactMarkdown linkTarget="_blank">
@@ -226,7 +237,7 @@ export default function Home() {
                           </Accordion>
                         </div>
                       )}
-                    </>
+                    </div>
                   );
                 })}
               </div>
