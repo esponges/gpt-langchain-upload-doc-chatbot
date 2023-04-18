@@ -11,24 +11,41 @@ export const config = {
     bodyParser: false
   }
 }
+import { createReadStream } from 'fs';
+
+interface FormData {
+  fields: {
+    question: string;
+    history: string;
+  };
+  files: {
+    file: formidable.File;
+  };
+}
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
   // will receive a FormData object
-  const formData = await new Promise((resolve, reject) => {
+  const formData = await new Promise<FormData>((resolve, reject) => {
     const form = new formidable.IncomingForm();
-    form.parse(req, (err, fields, files) => {
+    form.parse(req, (err, fields: any, files: any) => {
       if (err) {
         reject(err);
         return;
       }
+      const { file } = files;
+      files.file = {
+        ...file,
+        readStream: () => createReadStream(file.path),
+      };
       resolve({ fields, files });
     });
   });
 
   const { question, history } = formData.fields;
+  const { file } = formData.files;
 
   console.log('question', question);
 
