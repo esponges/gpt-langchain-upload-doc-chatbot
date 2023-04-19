@@ -5,49 +5,45 @@ import { makeChain } from '@/utils/makechain';
 // import { pinecone } from '@/utils/pinecone-client';
 // import { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE } from '@/config/pinecone';
 import formidable from 'formidable';
+import multiparty from 'multiparty';
 
 export const config = {
   api: {
-    bodyParser: false
-  }
-}
+    bodyParser: false,
+  },
+};
 import { createReadStream } from 'fs';
 
 interface FormData {
-  fields: {
-    question: string;
-    history: string;
-  };
-  files: {
-    file: formidable.File;
-  };
+  question: string;
+  history: string;
+  file: formidable.File;
+}
+
+interface ApiFormDataRequest extends NextApiRequest {
+  body: FormData;
 }
 
 export default async function handler(
-  req: NextApiRequest,
+  req: ApiFormDataRequest,
   res: NextApiResponse,
 ) {
   // will receive a FormData object
+  const form = new multiparty.Form();
   const formData = await new Promise<FormData>((resolve, reject) => {
-    const form = new formidable.IncomingForm();
-    form.parse(req, (err, fields: any, files: any) => {
+    form.parse(req, (err, fields, files) => {
       if (err) {
         reject(err);
         return;
       }
-      const { file } = files;
-      files.file = {
-        ...file,
-        readStream: () => createReadStream(file.path),
-      };
-      resolve({ fields, files });
+      const file = files.file[0];
+      const question = fields.question[0];
+      const history = fields.history[0];
+      resolve({ question, history, file });
     });
   });
-
-  const { question, history } = formData.fields;
-  const { file } = formData.files;
-
-  console.log('question', question);
+  
+  const { question, history, file } = formData;
 
   //only accept post requests
   if (req.method !== 'POST') {
