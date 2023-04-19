@@ -83,12 +83,6 @@ export default function Home() {
 
       const response = await fetch('/api/chat', {
         method: 'POST',
-        // headers: {
-        //   'Content-Type': 'application/json',
-        // },
-        // headers: {
-        //   'Content-Type': 'multipart/form-data',
-        // },
         body: formData,
       });
       const data = await response.json();
