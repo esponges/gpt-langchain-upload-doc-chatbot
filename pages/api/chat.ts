@@ -10,14 +10,23 @@ export const config = {
 };
 import { createReadStream } from 'fs';
 
-interface FormData {
+interface IFormData {
   question: string;
   history: string;
-  file: formidable.File;
+  // to do, type correctly
+  file: {
+    fieldName: string;
+    originalFilename: string;
+    path: string;
+    headers: {
+      [key: string]: string;
+    };
+    size: number;
+  };
 }
 
 interface ApiFormDataRequest extends NextApiRequest {
-  body: FormData;
+  body: IFormData;
 }
 
 export default async function handler(
@@ -26,7 +35,7 @@ export default async function handler(
 ) {
   // will receive a FormData object
   const form = new multiparty.Form();
-  const formData = await new Promise<FormData>((resolve, reject) => {
+  const formData = await new Promise<IFormData>((resolve, reject) => {
     form.parse(req, (err, fields, files) => {
       if (err) {
         reject(err);
@@ -54,18 +63,16 @@ export default async function handler(
   const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
 
   try {
-    console.log('sanitizedQuestion', sanitizedQuestion, 'formData', formData);
-
     //create chain
-    // const chain = await makeChain();
-    // //Ask a question using chat history
-    // const response = await chain.call({
-    //   question: sanitizedQuestion,
-    //   chat_history: history || [],
-    // });
+    const chain = await makeChain(file.path);
+    //Ask a question using chat history
+    const response = await chain.call({
+      question: sanitizedQuestion,
+      chat_history: history || [],
+    });
 
-    // console.log('response', response);
-    // res.status(200).json(response);
+    console.log('response', response);
+    res.status(200).json(response);
   } catch (error: any) {
     console.log('error', error);
     res.status(500).json({ error: error.message || 'Something went wrong' });
