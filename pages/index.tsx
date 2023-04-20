@@ -76,10 +76,8 @@ export default function Home() {
         formData.append('file', uploadedFile);
       }
       // also append question and history
-      // formData.append('question', question);
-      // formData.append('history', JSON.stringify(history));
-      formData.append('question', 'f');
-      formData.append('history', '[]');
+      formData.append('question', question);
+      formData.append('history', JSON.stringify(history));
 
       const response = await fetch('/api/chat', {
         method: 'POST',
