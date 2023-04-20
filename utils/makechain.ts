@@ -42,6 +42,8 @@ export const makeChain = async () => {
   /* Create the vectorstore */
   const vectorStore = await HNSWLib.fromDocuments(docs, new OpenAIEmbeddings());
 
+  console.log('make chain again');
+
   const chain = ConversationalRetrievalQAChain.fromLLM(
     model,
     vectorStore.asRetriever(),

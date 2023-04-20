@@ -1,9 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-// import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-// import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { makeChain } from '@/utils/makechain';
-// import { pinecone } from '@/utils/pinecone-client';
-// import { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE } from '@/config/pinecone';
 import formidable from 'formidable';
 import multiparty from 'multiparty';
 
@@ -59,17 +55,6 @@ export default async function handler(
 
   try {
     console.log('sanitizedQuestion', sanitizedQuestion, 'formData', formData);
-    // const index = pinecone.Index(PINECONE_INDEX_NAME);
-
-    // /* create vectorstore*/
-    // const vectorStore = await PineconeStore.fromExistingIndex(
-    //   new OpenAIEmbeddings({}),
-    //   {
-    //     pineconeIndex: index,
-    //     textKey: 'text',
-    //     namespace: PINECONE_NAME_SPACE, //namespace comes from your config folder
-    //   },
-    // );
 
     //create chain
     // const chain = await makeChain();
