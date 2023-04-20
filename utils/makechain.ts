@@ -1,5 +1,4 @@
 import { OpenAI } from 'langchain/llms/openai';
-// import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { ConversationalRetrievalQAChain } from 'langchain/chains';
 
 import { HNSWLib } from "langchain/vectorstores/hnswlib";
@@ -24,7 +23,7 @@ If the question is not related to the context, politely respond that you are tun
 Question: {question}
 Helpful answer in markdown:`;
 
-export const makeChain = async () => {
+export const makeChain = async (file?: string) => {
   const model = new OpenAI({
     temperature: 0, // increase temepreature to get more creative answers
     modelName: 'gpt-3.5-turbo', //change this to gpt-4 if you have access
@@ -35,12 +34,14 @@ export const makeChain = async () => {
   // const text = fs.readFileSync(path.join(__dirname, 'magic-lotr.txt'), 'utf8');
   // const text = fs.readFileSync("magic-lotr.txt", "utf8");
   const filePath = path.join(process.cwd(), 'public', 'magic-lotr.txt');
-  const text = fs.readFileSync(filePath, 'utf8');
+  const text = fs.readFileSync(file || filePath, 'utf8');
   /* Split the text into chunks */
   const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
   const docs = await textSplitter.createDocuments([text]);
   /* Create the vectorstore */
   const vectorStore = await HNSWLib.fromDocuments(docs, new OpenAIEmbeddings());
+
+  console.log('make chain again');
 
   const chain = ConversationalRetrievalQAChain.fromLLM(
     model,
@@ -53,9 +54,3 @@ export const makeChain = async () => {
   );
   return chain;
 };
-
-// the actual folder structure is:
-// utils
-//   makechain.ts
-//   pinecone-client.ts
-//   magic-lotr.txt

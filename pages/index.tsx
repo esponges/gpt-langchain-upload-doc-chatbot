@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, type ChangeEvent } from 'react';
 import Layout from '@/components/layout';
 import styles from '@/styles/Home.module.css';
 import { Message } from '@/types/chat';
@@ -25,12 +25,13 @@ export default function Home() {
   }>({
     messages: [
       {
-        message: 'Hi, what would you like to learn about this legal case?',
+        message: 'Hi, what would you like to learn about this document?',
         type: 'apiMessage',
       },
     ],
     history: [],
   });
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   const { messages, history } = messageState;
 
@@ -69,15 +70,19 @@ export default function Home() {
     setQuery('');
 
     try {
+      // append the file to the form data
+      const formData = new FormData();
+      if (uploadedFile) {
+        formData.append('file', uploadedFile);
+      }
+      // also append question and history
+      formData.append('question', question);
+      formData.append('history', JSON.stringify(history));
+      // formData.append('history', '[]');
+
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          question,
-          history,
-        }),
+        body: formData,
       });
       const data = await response.json();
       console.log('data', data);
@@ -120,13 +125,34 @@ export default function Home() {
     }
   };
 
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setUploadedFile(e.target.files[0]);
+    }
+  };
+
   return (
     <>
       <Layout>
         <div className="mx-auto flex flex-col gap-4">
           <h1 className="text-2xl font-bold leading-[1.1] tracking-tighter text-center">
-            Chat With Your Legal Docs
+            Chat about the uploaded document
           </h1>
+          <div className="">
+            <input
+              type="file"
+              name="file"
+              id="file"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+            <label
+              htmlFor="file"
+              className="flex items-center justify-center w-1/4 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Upload a document
+            </label>
+          </div>
           <main className={styles.main}>
             <div className={styles.cloud}>
               <div ref={messageListRef} className={styles.messagelist}>

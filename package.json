@@ -20,8 +20,10 @@
     "@radix-ui/react-accordion": "^1.1.1",
     "clsx": "^1.2.1",
     "dotenv": "^16.0.3",
+    "formidable": "^2.1.1",
     "langchain": "0.0.55",
     "lucide-react": "^0.125.0",
+    "multiparty": "^4.2.3",
     "next": "13.2.3",
     "pdf-parse": "1.1.1",
     "react": "18.2.0",
@@ -30,6 +32,8 @@
     "tailwind-merge": "^1.10.0"
   },
   "devDependencies": {
+    "@types/formidable": "^2.0.5",
+    "@types/multiparty": "^0.0.33",
     "@types/node": "^18.14.6",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",

@@ -1,17 +1,54 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-// import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-// import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { makeChain } from '@/utils/makechain';
-// import { pinecone } from '@/utils/pinecone-client';
-// import { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE } from '@/config/pinecone';
+import formidable from 'formidable';
+import multiparty from 'multiparty';
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+import { createReadStream } from 'fs';
+
+interface IFormData {
+  question: string;
+  history: string;
+  // to do, type correctly
+  file: {
+    fieldName: string;
+    originalFilename: string;
+    path: string;
+    headers: {
+      [key: string]: string;
+    };
+    size: number;
+  };
+}
+
+interface ApiFormDataRequest extends NextApiRequest {
+  body: IFormData;
+}
 
 export default async function handler(
-  req: NextApiRequest,
+  req: ApiFormDataRequest,
   res: NextApiResponse,
 ) {
-  const { question, history } = req.body;
-
-  console.log('question', question);
+  // will receive a FormData object
+  const form = new multiparty.Form();
+  const formData = await new Promise<IFormData>((resolve, reject) => {
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      const file = files.file[0];
+      const question = fields.question[0];
+      const history = fields.history[0];
+      resolve({ question, history, file });
+    });
+  });
+  
+  const { question, history, file } = formData;
 
   //only accept post requests
   if (req.method !== 'POST') {
@@ -19,27 +56,15 @@ export default async function handler(
     return;
   }
 
-  if (!question) {
+  if (!question || typeof question !== 'string') {
     return res.status(400).json({ message: 'No question in the request' });
   }
   // OpenAI recommends replacing newlines with spaces for best results
   const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
 
   try {
-    // const index = pinecone.Index(PINECONE_INDEX_NAME);
-
-    // /* create vectorstore*/
-    // const vectorStore = await PineconeStore.fromExistingIndex(
-    //   new OpenAIEmbeddings({}),
-    //   {
-    //     pineconeIndex: index,
-    //     textKey: 'text',
-    //     namespace: PINECONE_NAME_SPACE, //namespace comes from your config folder
-    //   },
-    // );
-
     //create chain
-    const chain = await makeChain();
+    const chain = await makeChain(file.path);
     //Ask a question using chat history
     const response = await chain.call({
       question: sanitizedQuestion,
