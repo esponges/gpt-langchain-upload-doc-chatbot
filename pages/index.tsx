@@ -78,6 +78,7 @@ export default function Home() {
       // also append question and history
       formData.append('question', question);
       formData.append('history', JSON.stringify(history));
+      // formData.append('history', '[]');
 
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -135,9 +136,9 @@ export default function Home() {
       <Layout>
         <div className="mx-auto flex flex-col gap-4">
           <h1 className="text-2xl font-bold leading-[1.1] tracking-tighter text-center">
-            Chat About your document
+            Chat about the uploaded document
           </h1>
-          <div className=''>
+          <div className="">
             <input
               type="file"
               name="file"
@@ -190,8 +191,8 @@ export default function Home() {
                         : styles.usermessage;
                   }
                   return (
-                    <div key={`chatMessage-${index}`} className={className}>
-                      <div>
+                    <>
+                      <div key={`chatMessage-${index}`} className={className}>
                         {icon}
                         <div className={styles.markdownanswer}>
                           <ReactMarkdown linkTarget="_blank">
@@ -229,7 +230,7 @@ export default function Home() {
                           </Accordion>
                         </div>
                       )}
-                    </div>
+                    </>
                   );
                 })}
               </div>
@@ -249,7 +250,7 @@ export default function Home() {
                     placeholder={
                       loading
                         ? 'Waiting for response...'
-                        : 'What is this document about?'
+                        : 'What is this legal case about?'
                     }
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
