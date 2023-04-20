@@ -135,10 +135,14 @@ export default function Home() {
     <>
       <Layout>
         <div className="mx-auto flex flex-col gap-4">
-          <h1 className="text-2xl font-bold leading-[1.1] tracking-tighter text-center">
-            Chat about the uploaded document
+          <h1 className="text-3xl font-bold leading-[1.1] tracking-tighter text-center">
+            {uploadedFile && uploadedFile.name ? (
+              <span className="text-blue-600">Chat about the uploaded {uploadedFile.name} file</span>
+            ) : (
+              'Chat about any uploaded document'
+            )}
           </h1>
-          <div className="">
+          <div className="pl-4">
             <input
               type="file"
               name="file"
@@ -152,6 +156,11 @@ export default function Home() {
             >
               Upload a document
             </label>
+            {uploadedFile && uploadedFile.name ? (
+              <p className="text-sm text-gray-500 mt-2">
+                {uploadedFile.name} uploaded
+              </p>
+            ) : null}
           </div>
           <main className={styles.main}>
             <div className={styles.cloud}>
@@ -250,7 +259,7 @@ export default function Home() {
                     placeholder={
                       loading
                         ? 'Waiting for response...'
-                        : 'What is this legal case about?'
+                        : uploadedFile?.name ? `Ask a question about ${uploadedFile.name}` : 'Upload a document first'
                     }
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
@@ -258,7 +267,7 @@ export default function Home() {
                   />
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || !uploadedFile}
                     className={styles.generatebutton}
                   >
                     {loading ? (
@@ -279,16 +288,16 @@ export default function Home() {
                 </form>
               </div>
             </div>
-            {error && (
+            {error || !uploadedFile && (
               <div className="border border-red-400 rounded-md p-4">
-                <p className="text-red-500">{error}</p>
+                <p className="text-red-500">{error || 'Please upload your file first to proceed'}</p>
               </div>
             )}
           </main>
         </div>
         <footer className="m-auto p-4">
           <a href="https://twitter.com/mayowaoshin">
-            Powered by LangChainAI. Demo built by Mayo (Twitter: @mayowaoshin).
+            Powered by LangChainAI. Demo built on top of @mayowaoshin initial project
           </a>
         </footer>
       </Layout>
