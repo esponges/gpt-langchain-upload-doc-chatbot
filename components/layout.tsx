@@ -1,8 +1,21 @@
+import { useEffect, useState } from "react";
+
 interface LayoutProps {
   children?: React.ReactNode;
 }
 
 export default function Layout({ children }: LayoutProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  // fixes hydration errors
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
   return (
     <div className="mx-auto flex flex-col space-y-4">
       <header className="container sticky top-0 z-40 bg-white">
