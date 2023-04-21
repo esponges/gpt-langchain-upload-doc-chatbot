@@ -291,14 +291,13 @@ export default function Home() {
                 </form>
               </div>
             </div>
-            {error ||
-              (!uploadedFile && (
+            {(error || !uploadedFile) ? (
                 <div className="border border-red-400 rounded-md p-4">
                   <p className="text-red-500">
                     {error || 'Please upload your file first to proceed'}
                   </p>
                 </div>
-              ))}
+              ) : null}
           </main>
         </div>
         <footer className="m-auto p-4">

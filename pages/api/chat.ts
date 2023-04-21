@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { makeChain } from '@/utils/makechain';
-import formidable from 'formidable';
 import multiparty from 'multiparty';
 
 export const config = {
@@ -8,7 +7,6 @@ export const config = {
     bodyParser: false,
   },
 };
-import { createReadStream } from 'fs';
 
 interface IFormData {
   question: string;
