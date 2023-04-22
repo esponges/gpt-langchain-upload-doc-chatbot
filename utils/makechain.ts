@@ -6,7 +6,7 @@ import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import * as fs from 'fs';
 import path from 'path';
-import * as pdfjs from 'pdfjs';
+import * as pdfjs from 'pdfjs-dist';
 
 const CONDENSE_PROMPT = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
 
@@ -33,32 +33,43 @@ export const makeChain = async (file?: string) => {
 
   // Load in the file we want to do question answering over
   const filePath = path.join(process.cwd(), 'public', 'magic-lotr.txt');
-
+  
   let text: string;
-
+  
   // Split the text into chunks
   const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
   let docs;
-
+  
   // if the file is a pdf, convert it to text with pdf-parse
   if (file && file.endsWith('.pdf')) {
     const file = fs.readFileSync(filePath);
-    const ext = new pdfjs.ExternalDocument(file);
+    // const pdfData = await pdf(file);
 
-    // now extract the text
-    const totalPages = ext.numPages;
+    pdfjs.getDocument(file).promise.then(async function (pdf) {
+      const numPages = pdf.numPages;
+      text = ''; // <-- Assign value to outer `text` variable
 
-    const pages = await Promise.all(
-      Array.from(Array(totalPages).keys()).map(async (i) => {
-        const page = await ext.getPage(i + 1);
-        return page.getTextContent();
-      }),
-    );
+      for (let i = 1; i <= numPages; i++) {
+        pdf.getPage(i).then(function (page) {
+          page.getTextContent().then(function (content) {
+            const pageText = content.items
+              .map((item) => {
+                if (item instanceof Object && 'str' in item) {
+                  // `item` is an instance of `TextItem`
+                  return item.str;
+                }
+                return '';
+              })
+              .join('');
+            text += pageText;
+          });
+        });
+      }
 
-    const text = pages
-      .map((page) => page.items.map((item) => item.str).join(' '))
-      .join(' ');
-    docs = await textSplitter.createDocuments([text]);
+      // text will not be an array of strings, but a single string is required
+      // turn into a single string
+      docs = await textSplitter.createDocuments([text]);
+    });
   } else {
     text = fs.readFileSync(filePath, 'utf8');
     docs = await textSplitter.createDocuments([text]);
