@@ -32,7 +32,22 @@ Helpful answer in markdown:`;
 const storeVectorizedFile = async () => {
   const text = path.join(process.cwd(), 'public', 'robot.pdf');
   const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
-  // const docs = await textSplitter.createDocuments([text]);
+  // const split = await textSplitter.createDocuments([text]);
+
+  // use pdfjs to load pdf
+  // https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
+  const loader = new PDFLoader(
+    'public/robot.pdf',
+    {
+      pdfjs: () => import('pdfjs-dist/legacy/build/pdf.js'),
+      splitPages: false,
+    },
+    
+  );
+
+  const pdf = await loader.load();
+  const content = pdf[0].pageContent;
+  const metadata = pdf[0].metadata;
 
   // get embeddings
   const embeddings = new OpenAIEmbeddings({
@@ -40,74 +55,26 @@ const storeVectorizedFile = async () => {
     modelName: 'gpt-3.5-turbo',
   });
 
-  // this works, not lets create a new index
-  const indexName = 'example-index';
-
-  // create a new index
-  // await pinecone.createIndex({
-  //   createRequest: {
-  //     name: "example-index",
-  //     dimension: 1024,
-  //     metadataConfig: {
-  //       indexed: ["color"],
-  //     },
-  //   },
-  // });
-
   // test if pinecone is working by fetching existing index
   // list collections
   const collections = await pinecone.listIndexes();
 
-  console.log('collections', collections);
   console.log('Node.js version:', process.version);
 
   const pineconeIndex = await pinecone.Index(collections[0]);
 
   const docs = [
     new Document({
-      metadata: { foo: 'bar' },
-      pageContent: 'pinecone is a vector db',
-    }),
-    new Document({
-      metadata: { foo: 'bar' },
-      pageContent: 'the quick brown fox jumped over the lazy dog',
-    }),
-    new Document({
-      metadata: { baz: 'qux' },
-      pageContent: 'lorem ipsum dolor sit amet',
-    }),
-    new Document({
-      metadata: { baz: 'qux' },
-      pageContent: 'pinecones are the woody fruiting body and of a pine tree',
+      metadata: { upload: metadata },
+      pageContent: content,
     }),
   ];
 
-  // add documents to index
+  // // add documents to index
   await PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), {
     pineconeIndex,
     namespace: 'test-namespace-1',
   });
-
-  // const upsertRequest = {
-  //   vectors: [
-  //     {
-  //       id: "vec1",
-  //       values: [0.1, 0.2, 0.3, 0.4],
-  //       metadata: {
-  //         genre: "drama",
-  //       },
-  //     },
-  //     {
-  //       id: "vec2",
-  //       values: [0.2, 0.3, 0.4, 0.5],
-  //       metadata: {
-  //         genre: "action",
-  //       },
-  //     },
-  //   ],
-  //   namespace: "example-namespace",
-  // };
-  // const upsertResponse = await pineconeIndex.upsert({ upsertRequest });
 
   console.log('upsert res' /* res */);
 };
