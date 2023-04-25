@@ -11,6 +11,7 @@ import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
 import { PineconeClient } from '@pinecone-database/pinecone';
 import { pinecone } from './pinecone-client';
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
+import { Document } from 'langchain/document';
 
 const CONDENSE_PROMPT = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
 
@@ -31,7 +32,7 @@ Helpful answer in markdown:`;
 const storeVectorizedFile = async () => {
   const text = path.join(process.cwd(), 'public', 'robot.pdf');
   const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
-  const docs = await textSplitter.createDocuments([text]);
+  // const docs = await textSplitter.createDocuments([text]);
 
   // get embeddings
   const embeddings = new OpenAIEmbeddings({
@@ -39,10 +40,8 @@ const storeVectorizedFile = async () => {
     modelName: 'gpt-3.5-turbo',
   });
 
-
-
   // this works, not lets create a new index
-  const indexName = 'test-index';
+  const indexName = 'example-index';
 
   // create a new index
   // await pinecone.createIndex({
@@ -57,13 +56,64 @@ const storeVectorizedFile = async () => {
 
   // test if pinecone is working by fetching existing index
   // list collections
-  const collections = await pinecone.listCollections();
+  const collections = await pinecone.listIndexes();
 
   console.log('collections', collections);
+  console.log('Node.js version:', process.version);
+
+  const pineconeIndex = await pinecone.Index(collections[0]);
+
+  const docs = [
+    new Document({
+      metadata: { foo: 'bar' },
+      pageContent: 'pinecone is a vector db',
+    }),
+    new Document({
+      metadata: { foo: 'bar' },
+      pageContent: 'the quick brown fox jumped over the lazy dog',
+    }),
+    new Document({
+      metadata: { baz: 'qux' },
+      pageContent: 'lorem ipsum dolor sit amet',
+    }),
+    new Document({
+      metadata: { baz: 'qux' },
+      pageContent: 'pinecones are the woody fruiting body and of a pine tree',
+    }),
+  ];
+
+  // add documents to index
+  await PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), {
+    pineconeIndex,
+    namespace: 'test-namespace-1',
+  });
+
+  // const upsertRequest = {
+  //   vectors: [
+  //     {
+  //       id: "vec1",
+  //       values: [0.1, 0.2, 0.3, 0.4],
+  //       metadata: {
+  //         genre: "drama",
+  //       },
+  //     },
+  //     {
+  //       id: "vec2",
+  //       values: [0.2, 0.3, 0.4, 0.5],
+  //       metadata: {
+  //         genre: "action",
+  //       },
+  //     },
+  //   ],
+  //   namespace: "example-namespace",
+  // };
+  // const upsertResponse = await pineconeIndex.upsert({ upsertRequest });
+
+  console.log('upsert res' /* res */);
 };
 
 export const makeChain = async (file?: string) => {
-  storeVectorizedFile();
+  await storeVectorizedFile();
 
   // const model = new OpenAI({
   //   temperature: 0, // increase temepreature to get more creative answers
@@ -73,9 +123,9 @@ export const makeChain = async (file?: string) => {
 
   // // Load in the file we want to do question answering over
   // const filePath = path.join(process.cwd(), 'public', 'magic-lotr.txt');
-  
+
   // let text: string;
-  
+
   // // Split the text into chunks
   // const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
   // let docs;
@@ -85,7 +135,7 @@ export const makeChain = async (file?: string) => {
   //   const loader = new PDFLoader(file);
   //   pdfData = await loader.load();
   // }
-  
+
   // // if the file is a pdf, convert it to text with pdf-parse
   // if (file && file.endsWith('.pdf')) {
   //   const file = fs.readFileSync(filePath);
