@@ -1,16 +1,10 @@
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
-import path from 'path';
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
-import { pinecone } from './pinecone-client';
+import { getPineconeIndex, pinecone } from './pinecone-client';
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { Document } from 'langchain/document';
 
 export const pineconeUpsert = async (filePath: string) => {
-  const text = path.join(process.cwd(), 'public', 'robot.pdf');
-  const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
-  // const split = await textSplitter.createDocuments([text]);
-
   try {
     // use pdfjs to load pdf
     // https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
@@ -23,16 +17,8 @@ export const pineconeUpsert = async (filePath: string) => {
     const content = pdf[0].pageContent;
     const metadata = pdf[0].metadata;
 
-    // get embeddings
-    // const embeddings = new OpenAIEmbeddings({
-    //   openAIApiKey: process.env.OPENAI_API_KEY,
-    //   modelName: 'gpt-3.5-turbo',
-    // });
-
-    // test if pinecone is working by fetching existing index
-    // list collections
-    const collections = await pinecone.listIndexes();
-    const pineconeIndex = await pinecone.Index(collections[0]);
+    // list collections - we'll use the first one which is the default for this example
+    const pineconeIndex = await getPineconeIndex();
 
     const docs = [
       new Document({
@@ -41,7 +27,7 @@ export const pineconeUpsert = async (filePath: string) => {
       }),
     ];
 
-    // // add documents to index
+    // add documents to index
     await PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), {
       pineconeIndex,
       namespace: 'test-namespace-1',
