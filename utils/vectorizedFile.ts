@@ -30,7 +30,7 @@ export const pineconeUpsert = async (filePath: string) => {
     // add documents to index
     await PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), {
       pineconeIndex,
-      namespace: 'test-namespace-1',
+      // namespace: 'test-namespace-1',
     });
 
     return pdf;

@@ -9,7 +9,7 @@ import path from 'path';
 import * as pdfjs from 'pdfjs-dist';
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
 import { PineconeClient } from '@pinecone-database/pinecone';
-import { pinecone } from './pinecone-client';
+import { getPineconeIndex, pinecone } from './pinecone-client';
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { Document } from 'langchain/document';
 
@@ -32,6 +32,18 @@ Helpful answer in markdown:`;
 
 
 export const makeChain = async (file: string) => {
+  const pineconeIndex = await getPineconeIndex();
+
+  const vectorStore = await PineconeStore.fromExistingIndex(
+    new OpenAIEmbeddings(),
+    { pineconeIndex },
+  );
+
+  console.log('vectorStore', vectorStore);
+
+  const results = await vectorStore.similaritySearch("robot", 5);
+
+  console.log('results', results);
 
   // const model = new OpenAI({
   //   temperature: 0, // increase temepreature to get more creative answers

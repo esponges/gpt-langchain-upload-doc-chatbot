@@ -64,7 +64,7 @@ export default async function handler(
   try {
     //create chain
     const vectorizedFile = await pineconeUpsert(file.path);
-    // const chain = await makeChain(file.path);
+    const chain = await makeChain(file.path);
     //Ask a question using chat history
     // const response = await chain.call({
     //   question: sanitizedQuestion,
