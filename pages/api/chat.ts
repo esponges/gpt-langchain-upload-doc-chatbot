@@ -64,13 +64,13 @@ export default async function handler(
     //create chain
     const chain = await makeChain(file.path);
     //Ask a question using chat history
-    const response = await chain.call({
-      question: sanitizedQuestion,
-      chat_history: history || [],
-    });
+    // const response = await chain.call({
+    //   question: sanitizedQuestion,
+    //   chat_history: history || [],
+    // });
 
-    console.log('response', response);
-    res.status(200).json(response);
+    console.log('response');
+    res.status(200).json({});
   } catch (error: any) {
     console.log('error', error);
     res.status(500).json({ error: error.message || 'Something went wrong' });

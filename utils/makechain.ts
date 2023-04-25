@@ -7,6 +7,10 @@ import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import * as fs from 'fs';
 import path from 'path';
 import * as pdfjs from 'pdfjs-dist';
+import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
+import { PineconeClient } from '@pinecone-database/pinecone';
+import { pinecone } from './pinecone-client';
+import { PineconeStore } from 'langchain/vectorstores/pinecone';
 
 const CONDENSE_PROMPT = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
 
@@ -24,70 +28,112 @@ If the question is not related to the context, politely respond that you are tun
 Question: {question}
 Helpful answer in markdown:`;
 
-export const makeChain = async (file?: string) => {
-  const model = new OpenAI({
-    temperature: 0, // increase temepreature to get more creative answers
-    modelName: 'gpt-3.5-turbo', //change this to gpt-4 if you have access
+const storeVectorizedFile = async () => {
+  const text = path.join(process.cwd(), 'public', 'robot.pdf');
+  const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
+  const docs = await textSplitter.createDocuments([text]);
+
+  // get embeddings
+  const embeddings = new OpenAIEmbeddings({
     openAIApiKey: process.env.OPENAI_API_KEY,
+    modelName: 'gpt-3.5-turbo',
   });
 
-  // Load in the file we want to do question answering over
-  const filePath = path.join(process.cwd(), 'public', 'magic-lotr.txt');
+
+
+  // this works, not lets create a new index
+  const indexName = 'test-index';
+
+  // create a new index
+  // await pinecone.createIndex({
+  //   createRequest: {
+  //     name: "example-index",
+  //     dimension: 1024,
+  //     metadataConfig: {
+  //       indexed: ["color"],
+  //     },
+  //   },
+  // });
+
+  // test if pinecone is working by fetching existing index
+  // list collections
+  const collections = await pinecone.listCollections();
+
+  console.log('collections', collections);
+};
+
+export const makeChain = async (file?: string) => {
+  storeVectorizedFile();
+
+  // const model = new OpenAI({
+  //   temperature: 0, // increase temepreature to get more creative answers
+  //   modelName: 'gpt-3.5-turbo', //change this to gpt-4 if you have access
+  //   openAIApiKey: process.env.OPENAI_API_KEY,
+  // });
+
+  // // Load in the file we want to do question answering over
+  // const filePath = path.join(process.cwd(), 'public', 'magic-lotr.txt');
   
-  let text: string;
+  // let text: string;
   
-  // Split the text into chunks
-  const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
-  let docs;
+  // // Split the text into chunks
+  // const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
+  // let docs;
+
+  // let pdfData;
+  // if (file) {
+  //   const loader = new PDFLoader(file);
+  //   pdfData = await loader.load();
+  // }
   
-  // if the file is a pdf, convert it to text with pdf-parse
-  if (file && file.endsWith('.pdf')) {
-    const file = fs.readFileSync(filePath);
-    // const pdfData = await pdf(file);
+  // // if the file is a pdf, convert it to text with pdf-parse
+  // if (file && file.endsWith('.pdf')) {
+  //   const file = fs.readFileSync(filePath);
+  //   // const pdfData = await pdf(file);
 
-    pdfjs.getDocument(file).promise.then(async function (pdf) {
-      const numPages = pdf.numPages;
-      text = ''; // <-- Assign value to outer `text` variable
+  //   pdfjs.getDocument(file).promise.then(async function (pdf) {
+  //     const numPages = pdf.numPages;
+  //     text = ''; // <-- Assign value to outer `text` variable
 
-      for (let i = 1; i <= numPages; i++) {
-        pdf.getPage(i).then(function (page) {
-          page.getTextContent().then(function (content) {
-            const pageText = content.items
-              .map((item) => {
-                if (item instanceof Object && 'str' in item) {
-                  // `item` is an instance of `TextItem`
-                  return item.str;
-                }
-                return '';
-              })
-              .join('');
-            text += pageText;
-          });
-        });
-      }
+  //     for (let i = 1; i <= numPages; i++) {
+  //       pdf.getPage(i).then(function (page) {
+  //         page.getTextContent().then(function (content) {
+  //           const pageText = content.items
+  //             .map((item) => {
+  //               if (item instanceof Object && 'str' in item) {
+  //                 // `item` is an instance of `TextItem`
+  //                 return item.str;
+  //               }
+  //               return '';
+  //             })
+  //             .join('');
+  //           text += pageText;
+  //         });
+  //       });
+  //     }
 
-      // text will not be an array of strings, but a single string is required
-      // turn into a single string
-      docs = await textSplitter.createDocuments([text]);
-    });
-  } else {
-    text = fs.readFileSync(filePath, 'utf8');
-    docs = await textSplitter.createDocuments([text]);
-  }
+  //     // text will not be an array of strings, but a single string is required
+  //     // turn into a single string
+  //     docs = await textSplitter.createDocuments([text]);
+  //   });
+  // } else {
+  //   text = fs.readFileSync(filePath, 'utf8');
+  //   docs = await textSplitter.createDocuments([text]);
+  // }
 
-  // Create the vectorstore
-  const vectorStore = await HNSWLib.fromDocuments(docs, new OpenAIEmbeddings());
+  // // Create the vectorstore
+  // const vectorStore = await HNSWLib.fromDocuments(docs, new OpenAIEmbeddings());
 
-  console.log('make chain again');
+  // console.log('make chain again');
 
-  const chain = ConversationalRetrievalQAChain.fromLLM(
-    model,
-    vectorStore.asRetriever(),
-    {
-      qaTemplate: QA_PROMPT,
-      questionGeneratorTemplate: CONDENSE_PROMPT,
-      returnSourceDocuments: true, //The number of source documents returned is 4 by default
-    },
-  );
-  return chain;
+  // const chain = ConversationalRetrievalQAChain.fromLLM(
+  //   model,
+  //   vectorStore.asRetriever(),
+  //   {
+  //     qaTemplate: QA_PROMPT,
+  //     questionGeneratorTemplate: CONDENSE_PROMPT,
+  //     returnSourceDocuments: true, //The number of source documents returned is 4 by default
+  //   },
+  // );
+  // return chain;
 };
