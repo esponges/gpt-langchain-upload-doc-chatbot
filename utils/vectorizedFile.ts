@@ -3,8 +3,9 @@ import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
 import { getPineconeIndex, pinecone } from './pinecone-client';
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { Document } from 'langchain/document';
+import { PineconeClient } from '@pinecone-database/pinecone';
 
-export const pineconeUpsert = async (filePath: string) => {
+export const pineconeUpsert = async (filePath: string, pineconeClient: PineconeClient) => {
   try {
     // use pdfjs to load pdf
     // https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
@@ -18,7 +19,7 @@ export const pineconeUpsert = async (filePath: string) => {
     const metadata = pdf[0].metadata;
 
     // list collections - we'll use the first one which is the default for this example
-    const pineconeIndex = await getPineconeIndex();
+    const pineconeIndex = await getPineconeIndex(pineconeClient);
 
     const docs = [
       new Document({

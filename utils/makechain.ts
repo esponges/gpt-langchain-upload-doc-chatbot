@@ -12,6 +12,7 @@ import { PineconeClient } from '@pinecone-database/pinecone';
 import { getPineconeIndex, pinecone } from './pinecone-client';
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { Document } from 'langchain/document';
+import { VectorOperationsApi } from '@pinecone-database/pinecone/dist/pinecone-generated-ts-fetch';
 
 const CONDENSE_PROMPT = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
 
@@ -31,26 +32,32 @@ Helpful answer in markdown:`;
 
 
 
-export const makeChain = async (file: string) => {
-  const pineconeIndex = await getPineconeIndex();
+export const makeChain = async (pineconeClient: PineconeClient) => {
+  const pineconeIndex = await getPineconeIndex(pineconeClient);
 
   const vectorStore = await PineconeStore.fromExistingIndex(
     new OpenAIEmbeddings(),
     { pineconeIndex },
   );
 
-  console.log('vectorStore', vectorStore);
+  // console.log('vectorStore', vectorStore);
 
-  const results = await vectorStore.similaritySearch("robot", 5);
+  // const results = await vectorStore.similaritySearch("robot", 5);
 
-  console.log('results', results);
+  // console.log('results', results);
 
-  // const model = new OpenAI({
-  //   temperature: 0, // increase temepreature to get more creative answers
-  //   modelName: 'gpt-3.5-turbo', //change this to gpt-4 if you have access
-  //   openAIApiKey: process.env.OPENAI_API_KEY,
-  // });
+  const model = new OpenAI({
+    temperature: 0, // increase temepreature to get more creative answers
+    modelName: 'gpt-3.5-turbo', //change this to gpt-4 if you have access
+    openAIApiKey: process.env.OPENAI_API_KEY,
+  });
 
+  return ConversationalRetrievalQAChain.fromLLM(model, vectorStore.asRetriever(), {
+    qaTemplate: QA_PROMPT,
+    questionGeneratorTemplate: CONDENSE_PROMPT,
+    returnSourceDocuments: true,
+  });
+};
   // // Load in the file we want to do question answering over
   // const filePath = path.join(process.cwd(), 'public', 'magic-lotr.txt');
 
@@ -116,4 +123,4 @@ export const makeChain = async (file: string) => {
   //   },
   // );
   // return chain;
-};
+// };

@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { makeChain } from '@/utils/makechain';
 import multiparty from 'multiparty';
 import { pineconeUpsert } from '@/utils/vectorizedFile';
+import { pinecone } from '@/utils/pinecone-client';
 
 export const config = {
   api: {
@@ -63,8 +64,9 @@ export default async function handler(
 
   try {
     //create chain
-    const vectorizedFile = await pineconeUpsert(file.path);
-    const chain = await makeChain(file.path);
+    const pineconeClient = pinecone;
+    const vectorizedFile = await pineconeUpsert(file.path, pineconeClient);
+    const chain = await makeChain(pineconeClient);
     //Ask a question using chat history
     // const response = await chain.call({
     //   question: sanitizedQuestion,

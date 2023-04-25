@@ -22,10 +22,13 @@ async function initPinecone() {
 
 export const pinecone = await initPinecone();
 
-export const getPineconeIndex = async () => {
+export const getPineconeIndex = async (client?: PineconeClient) => {
+  // if no client has been initialized, initialize one
+  const store = client || pinecone;
+
   try {
-    const collections = await pinecone.listIndexes();
-    const pineconeIndex = await pinecone.Index(collections[0]);
+    const collections = await store.listIndexes();
+    const pineconeIndex = await store.Index(collections[0]);
     
     return pineconeIndex;
   } catch (error) {
