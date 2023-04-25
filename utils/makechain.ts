@@ -29,58 +29,9 @@ If the question is not related to the context, politely respond that you are tun
 Question: {question}
 Helpful answer in markdown:`;
 
-const storeVectorizedFile = async () => {
-  const text = path.join(process.cwd(), 'public', 'robot.pdf');
-  const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
-  // const split = await textSplitter.createDocuments([text]);
 
-  // use pdfjs to load pdf
-  // https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
-  const loader = new PDFLoader(
-    'public/robot.pdf',
-    {
-      pdfjs: () => import('pdfjs-dist/legacy/build/pdf.js'),
-      splitPages: false,
-    },
-    
-  );
 
-  const pdf = await loader.load();
-  const content = pdf[0].pageContent;
-  const metadata = pdf[0].metadata;
-
-  // get embeddings
-  const embeddings = new OpenAIEmbeddings({
-    openAIApiKey: process.env.OPENAI_API_KEY,
-    modelName: 'gpt-3.5-turbo',
-  });
-
-  // test if pinecone is working by fetching existing index
-  // list collections
-  const collections = await pinecone.listIndexes();
-
-  console.log('Node.js version:', process.version);
-
-  const pineconeIndex = await pinecone.Index(collections[0]);
-
-  const docs = [
-    new Document({
-      metadata: { upload: metadata },
-      pageContent: content,
-    }),
-  ];
-
-  // // add documents to index
-  await PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), {
-    pineconeIndex,
-    namespace: 'test-namespace-1',
-  });
-
-  console.log('upsert res' /* res */);
-};
-
-export const makeChain = async (file?: string) => {
-  await storeVectorizedFile();
+export const makeChain = async (file: string) => {
 
   // const model = new OpenAI({
   //   temperature: 0, // increase temepreature to get more creative answers
