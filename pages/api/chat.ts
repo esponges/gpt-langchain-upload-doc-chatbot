@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { makeChain } from '@/utils/makechain';
 import multiparty from 'multiparty';
+import { pineconeUpsert } from '@/utils/vectorizedFile';
 
 export const config = {
   api: {
@@ -62,7 +63,8 @@ export default async function handler(
 
   try {
     //create chain
-    const chain = await makeChain(file.path);
+    const vectorizedFile = await pineconeUpsert(file.path);
+    // const chain = await makeChain(file.path);
     //Ask a question using chat history
     // const response = await chain.call({
     //   question: sanitizedQuestion,
@@ -72,7 +74,7 @@ export default async function handler(
     console.log('response');
     res.status(200).json({});
   } catch (error: any) {
-    console.log('error', error);
+    console.log('error creating chain', error);
     res.status(500).json({ error: error.message || 'Something went wrong' });
   }
 }

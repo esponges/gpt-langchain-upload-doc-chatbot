@@ -6,7 +6,7 @@ import { pinecone } from './pinecone-client';
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { Document } from 'langchain/document';
 
-export const pineConeUpsert = async (filePath: string) => {
+export const pineconeUpsert = async (filePath: string) => {
   const text = path.join(process.cwd(), 'public', 'robot.pdf');
   const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
   // const split = await textSplitter.createDocuments([text]);
