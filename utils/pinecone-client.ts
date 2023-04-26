@@ -21,3 +21,19 @@ async function initPinecone() {
 }
 
 export const pinecone = await initPinecone();
+
+export const getPineconeIndex = async (client?: PineconeClient) => {
+  // if no client has been initialized, initialize one
+  const store = client || pinecone;
+
+  try {
+    const collections = await store.listIndexes();
+    const pineconeIndex = await store.Index(collections[0]);
+    
+    return pineconeIndex;
+  } catch (error) {
+    console.log('error', error);
+    
+    throw new Error('Failed to get Pinecone Index');
+  }
+}

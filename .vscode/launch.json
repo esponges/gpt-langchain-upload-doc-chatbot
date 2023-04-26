@@ -5,7 +5,7 @@
       "name": "Next.js: debug server-side",
       "type": "node-terminal",
       "request": "launch",
-      "command": "npm run dev"
+      "command": "nvm use v18.16 && npm run dev"
     },
     {
       "name": "Next.js: debug client-side",

@@ -1,6 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { makeChain } from '@/utils/makechain';
 import multiparty from 'multiparty';
+import { pineconeUpsert } from '@/utils/vectorizedFile';
+import { pinecone } from '@/utils/pinecone-client';
 
 export const config = {
   api: {
@@ -61,18 +63,23 @@ export default async function handler(
   const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
 
   try {
+    const pineconeClient = pinecone;
+    
+    // to do, figure out if we need to vectorize the file if its already vectorized
+    // const vectorizedFile = await pineconeUpsert(file.path, pineconeClient);
+    
     //create chain
-    const chain = await makeChain(file.path);
+    const chain = await makeChain(pineconeClient);
     //Ask a question using chat history
     const response = await chain.call({
       question: sanitizedQuestion,
       chat_history: history || [],
     });
 
-    console.log('response', response);
+    console.log('response');
     res.status(200).json(response);
   } catch (error: any) {
-    console.log('error', error);
+    console.log('error creating chain', error);
     res.status(500).json({ error: error.message || 'Something went wrong' });
   }
 }
