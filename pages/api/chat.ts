@@ -63,9 +63,12 @@ export default async function handler(
   const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
 
   try {
-    //create chain
     const pineconeClient = pinecone;
+    
+    // to do, figure out if we need to vectorize the file if its already vectorized
     // const vectorizedFile = await pineconeUpsert(file.path, pineconeClient);
+    
+    //create chain
     const chain = await makeChain(pineconeClient);
     //Ask a question using chat history
     const response = await chain.call({
