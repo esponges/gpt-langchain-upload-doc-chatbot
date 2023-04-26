@@ -65,16 +65,16 @@ export default async function handler(
   try {
     //create chain
     const pineconeClient = pinecone;
-    const vectorizedFile = await pineconeUpsert(file.path, pineconeClient);
+    // const vectorizedFile = await pineconeUpsert(file.path, pineconeClient);
     const chain = await makeChain(pineconeClient);
     //Ask a question using chat history
-    // const response = await chain.call({
-    //   question: sanitizedQuestion,
-    //   chat_history: history || [],
-    // });
+    const response = await chain.call({
+      question: sanitizedQuestion,
+      chat_history: history || [],
+    });
 
     console.log('response');
-    res.status(200).json({});
+    res.status(200).json(response);
   } catch (error: any) {
     console.log('error creating chain', error);
     res.status(500).json({ error: error.message || 'Something went wrong' });
