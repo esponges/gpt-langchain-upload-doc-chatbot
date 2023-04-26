@@ -18,7 +18,8 @@ const textToVector = async (text: string) => {
   const embeddings = await openai.createEmbedding({
     model: 'text-embedding-ada-002',
     /* to do, figure out error in the open ai api using the normalized text */
-    input: "the sad story of an ugly robot who didn't know how to love",
+    // input: "the sad story of an ugly robot who didn't know how to love",
+    input: normalized,
   });
 
   return embeddings;
@@ -49,7 +50,7 @@ export const pineconeUpsert = async (
       vectors: [
         {
           // test
-          id: '1',
+          id: '2',
           values: vectors.data.data[0].embedding,
           // todo: figure out metadata error here
           // metadata,
