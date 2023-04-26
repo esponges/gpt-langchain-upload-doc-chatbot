@@ -60,23 +60,23 @@ export default async function handler(
     return res.status(400).json({ message: 'No question in the request' });
   }
   // OpenAI recommends replacing newlines with spaces for best results
-  const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
-
+  
   try {
     const pineconeClient = pinecone;
     
-    // to do, figure out if we need to vectorize the file if its already vectorized
     // const vectorizedFile = await langchainPineconeUpsert(file.path, pineconeClient);
+    // const vectorizedFile = await pineconeUpsert(file.path, pineconeClient);
     
-    //create chain
+    //create chain for conversational AI
     const chain = await makeChain(pineconeClient);
+
     //Ask a question using chat history
+    const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
     const response = await chain.call({
       question: sanitizedQuestion,
       chat_history: history || [],
     });
 
-    console.log('response');
     res.status(200).json(response);
   } catch (error: any) {
     console.log('error creating chain', error);

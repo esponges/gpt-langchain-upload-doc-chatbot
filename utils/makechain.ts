@@ -22,14 +22,17 @@ If the question is not related to the context, politely respond that you are tun
 Question: {question}
 Helpful answer in markdown:`;
 
-
-
 export const makeChain = async (pineconeClient: PineconeClient) => {
   const pineconeIndex = await getPineconeIndex(pineconeClient);
 
   const vectorStore = await PineconeStore.fromExistingIndex(
     new OpenAIEmbeddings(),
-    { pineconeIndex },
+    {
+      pineconeIndex,
+      // make this dynamic so we can store one namespace per pdf in pinecone
+      // without this value the information won't be found by the retriever
+      namespace: 'pdf-test',
+    },
   );
 
   const model = new OpenAI({
@@ -38,9 +41,13 @@ export const makeChain = async (pineconeClient: PineconeClient) => {
     openAIApiKey: process.env.OPENAI_API_KEY,
   });
 
-  return ConversationalRetrievalQAChain.fromLLM(model, vectorStore.asRetriever(), {
-    qaTemplate: QA_PROMPT,
-    questionGeneratorTemplate: CONDENSE_PROMPT,
-    returnSourceDocuments: true,
-  });
+  return ConversationalRetrievalQAChain.fromLLM(
+    model,
+    vectorStore.asRetriever(),
+    {
+      qaTemplate: QA_PROMPT,
+      questionGeneratorTemplate: CONDENSE_PROMPT,
+      returnSourceDocuments: true,
+    },
+  );
 };
