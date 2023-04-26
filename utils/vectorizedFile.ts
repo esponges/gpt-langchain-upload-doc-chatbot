@@ -4,8 +4,8 @@ import { getPineconeIndex, pinecone } from './pinecone-client';
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { Document } from 'langchain/document';
 import { PineconeClient, UpsertRequest } from '@pinecone-database/pinecone';
-import { OpenAI } from 'langchain';
 import { OpenAIApi, Configuration } from 'openai';
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 
 const textToVector = async (text: string) => {
   // as per openai docs, we need to trim and remove newlines
@@ -23,6 +23,43 @@ const textToVector = async (text: string) => {
   });
 
   return embeddings;
+};
+
+export const langchainPineconeUpsert = async (
+  filePath: string,
+  pineconeClient: PineconeClient,
+) => {
+  // use pdfjs to load pdf
+  // https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
+  const loader = new PDFLoader(filePath, {
+    pdfjs: () => import('pdfjs-dist/legacy/build/pdf.js'),
+    splitPages: false,
+  });
+
+  const pdf = await loader.load();
+  const content = pdf[0].pageContent;
+  const metadata = pdf[0].metadata;
+
+  // list collections - we'll use the first one which is the default for this example
+  const pineconeIndex = await getPineconeIndex(pineconeClient);
+
+  /* Split text into chunks */
+  const textSplitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 1000,
+    chunkOverlap: 200,
+  });
+
+  const docs = await textSplitter.splitDocuments(pdf);
+
+  // add documents to index
+  await PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), {
+    pineconeIndex,
+    namespace: 'not-vectorized-test',
+  });
+
+  throw new Error('not implemented');
+
+  return pdf;
 };
 
 export const pineconeUpsert = async (
