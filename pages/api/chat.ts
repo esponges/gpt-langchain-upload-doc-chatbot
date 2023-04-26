@@ -66,7 +66,7 @@ export default async function handler(
     const pineconeClient = pinecone;
     
     // to do, figure out if we need to vectorize the file if its already vectorized
-    // const vectorizedFile = await pineconeUpsert(file.path, pineconeClient);
+    const vectorizedFile = await pineconeUpsert(file.path, pineconeClient);
     
     //create chain
     const chain = await makeChain(pineconeClient);

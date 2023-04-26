@@ -4,6 +4,25 @@ import { getPineconeIndex, pinecone } from './pinecone-client';
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { Document } from 'langchain/document';
 import { PineconeClient } from '@pinecone-database/pinecone';
+import { OpenAI } from 'langchain';
+import { OpenAIApi, Configuration } from 'openai';
+
+const textToVector = async (text: string) => {
+  // as per openai docs, we need to trim and remove newlines
+  const normalized = text.trim().replaceAll('\n', ' ');
+  const configuration = new Configuration({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
+  const openai = new OpenAIApi(configuration);
+  const embeddings = await openai.createEmbedding({
+    model: 'text-embedding-ada-002',
+    input: normalized,
+  });
+
+  return embeddings;
+};
+  
 
 export const pineconeUpsert = async (filePath: string, pineconeClient: PineconeClient) => {
   try {
@@ -18,21 +37,24 @@ export const pineconeUpsert = async (filePath: string, pineconeClient: PineconeC
     const content = pdf[0].pageContent;
     const metadata = pdf[0].metadata;
 
+    const vectors = await textToVector(content);
+
     // list collections - we'll use the first one which is the default for this example
     const pineconeIndex = await getPineconeIndex(pineconeClient);
 
-    const docs = [
-      new Document({
-        metadata: { upload: metadata },
-        pageContent: content,
-      }),
-    ];
+    // const docs = [
+    //   new Document({
+    //     metadata: { upload: metadata, id: 1 },
+    //     pageContent: content,
+    //   }),
+    // ];
 
-    // add documents to index
-    await PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), {
-      pineconeIndex,
-      namespace: 'test-namespace-1',
-    });
+    // // add documents to index
+    // await PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), {
+    //   pineconeIndex,
+    //   namespace: 'test-namespace-1',
+    // });
+    throw new Error('not implemented');
 
     return pdf;
   } catch (e) {
@@ -40,15 +62,15 @@ export const pineconeUpsert = async (filePath: string, pineconeClient: PineconeC
     if (e instanceof Error) {
       console.error(e.message);
 
-      return e.message;
+      throw new Error(e.message);
     } else if (typeof e === 'string') {
       console.error(e);
 
-      return e;
+      throw new Error(e);
     } else {
       console.error('Unknown error');
 
-      return 'Unknown error when vectorizing and storing file in the pinecone index.';
+      throw new Error('Unknown error when vectorizing and storing file in the pinecone index.');
     }
   }
 };
