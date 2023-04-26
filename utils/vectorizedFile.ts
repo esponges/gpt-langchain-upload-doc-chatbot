@@ -3,7 +3,7 @@ import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
 import { getPineconeIndex, pinecone } from './pinecone-client';
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { Document } from 'langchain/document';
-import { PineconeClient } from '@pinecone-database/pinecone';
+import { PineconeClient, UpsertRequest } from '@pinecone-database/pinecone';
 import { OpenAI } from 'langchain';
 import { OpenAIApi, Configuration } from 'openai';
 
@@ -17,14 +17,17 @@ const textToVector = async (text: string) => {
   const openai = new OpenAIApi(configuration);
   const embeddings = await openai.createEmbedding({
     model: 'text-embedding-ada-002',
-    input: normalized,
+    /* to do, figure out error in the open ai api using the normalized text */
+    input: "the sad story of an ugly robot who didn't know how to love",
   });
 
   return embeddings;
 };
-  
 
-export const pineconeUpsert = async (filePath: string, pineconeClient: PineconeClient) => {
+export const pineconeUpsert = async (
+  filePath: string,
+  pineconeClient: PineconeClient,
+) => {
   try {
     // use pdfjs to load pdf
     // https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
@@ -39,21 +42,24 @@ export const pineconeUpsert = async (filePath: string, pineconeClient: PineconeC
 
     const vectors = await textToVector(content);
 
-    // list collections - we'll use the first one which is the default for this example
+    // we'll use the only index we have
     const pineconeIndex = await getPineconeIndex(pineconeClient);
 
-    // const docs = [
-    //   new Document({
-    //     metadata: { upload: metadata, id: 1 },
-    //     pageContent: content,
-    //   }),
-    // ];
+    const upsertRequest: UpsertRequest = {
+      vectors: [
+        {
+          // test
+          id: '1',
+          values: vectors.data.data[0].embedding,
+          // todo: figure out metadata error here
+          // metadata,
+        },
+      ],
+      namespace: 'test-namespace-wednesday',
+    };
 
-    // // add documents to index
-    // await PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), {
-    //   pineconeIndex,
-    //   namespace: 'test-namespace-1',
-    // });
+    const upsertResponse = await pineconeIndex.upsert({ upsertRequest });
+
     throw new Error('not implemented');
 
     return pdf;
@@ -70,7 +76,9 @@ export const pineconeUpsert = async (filePath: string, pineconeClient: PineconeC
     } else {
       console.error('Unknown error');
 
-      throw new Error('Unknown error when vectorizing and storing file in the pinecone index.');
+      throw new Error(
+        'Unknown error when vectorizing and storing file in the pinecone index.',
+      );
     }
   }
 };
