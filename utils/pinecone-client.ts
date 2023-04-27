@@ -1,4 +1,5 @@
 import { PineconeClient } from '@pinecone-database/pinecone';
+import { NamespaceSummary } from '@pinecone-database/pinecone/dist/pinecone-generated-ts-fetch';
 
 if (!process.env.PINECONE_ENVIRONMENT || !process.env.PINECONE_API_KEY) {
   throw new Error('Pinecone environment or api key vars missing');
@@ -31,6 +32,25 @@ export const getPineconeIndex = async (client?: PineconeClient) => {
     const pineconeIndex = await store.Index(collections[0]);
     
     return pineconeIndex;
+  } catch (error) {
+    console.log('error', error);
+    
+    throw new Error('Failed to get Pinecone Index');
+  }
+}
+
+// figure out if object contains a namespace as key in the namespace object
+const namespaceExistsInIndex = (key: string, namespaces?: Record<string, NamespaceSummary>) => {
+  if (!namespaces) return false;
+
+  return Object.keys(namespaces).includes(key);
+}
+
+export const getPineconeExistingNamespaces = async (fileName: string, client: PineconeClient) => {
+  const pineconeIndex = await getPineconeIndex(client);
+  try {
+    const idxDetails = await pineconeIndex.describeIndexStats({ describeIndexStatsRequest: { filter: {} }});
+    return namespaceExistsInIndex(fileName, idxDetails.namespaces);
   } catch (error) {
     console.log('error', error);
     

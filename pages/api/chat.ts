@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { makeChain } from '@/utils/makechain';
 import multiparty from 'multiparty';
 import { langchainPineconeUpsert, pineconeUpsert } from '@/utils/vectorizedFile';
-import { pinecone } from '@/utils/pinecone-client';
+import { getPineconeExistingNamespaces, pinecone } from '@/utils/pinecone-client';
 
 export const config = {
   api: {
@@ -13,7 +13,7 @@ export const config = {
 interface IFormData {
   question: string;
   history: string;
-  // to do, type correctly
+  // to do, type correctly?
   file: {
     fieldName: string;
     originalFilename: string;
@@ -67,9 +67,14 @@ export default async function handler(
     const fileName = file.originalFilename;
 
     // store vector in pinecone
-    if (isFirstUserMessage) {
-      await langchainPineconeUpsert(file.path, pineconeClient, fileName);
-      // const vectorizedFile = await pineconeUpsert(file.path, pineconeClient);
+    if (isFirstUserMessage ) {
+      // figure if user has already uploaded this file before
+      const fileExistsInDB = await getPineconeExistingNamespaces(fileName, pineconeClient);
+
+      if (!fileExistsInDB) {
+        await langchainPineconeUpsert(file.path, pineconeClient, fileName);
+        // const vectorizedFile = await pineconeUpsert(file.path, pineconeClient);
+      }
     }
     
     //create chain for conversational AI
