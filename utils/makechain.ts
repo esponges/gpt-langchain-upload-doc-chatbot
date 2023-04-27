@@ -22,7 +22,7 @@ If the question is not related to the context, politely respond that you are tun
 Question: {question}
 Helpful answer in markdown:`;
 
-export const makeChain = async (pineconeClient: PineconeClient) => {
+export const makeChain = async (pineconeClient: PineconeClient, namespace: string) => {
   const pineconeIndex = await getPineconeIndex(pineconeClient);
 
   const vectorStore = await PineconeStore.fromExistingIndex(
@@ -31,7 +31,7 @@ export const makeChain = async (pineconeClient: PineconeClient) => {
       pineconeIndex,
       // make this dynamic so we can store one namespace per pdf in pinecone
       // without this value the information won't be found by the retriever
-      namespace: 'pdf-test',
+      namespace,
     },
   );
 

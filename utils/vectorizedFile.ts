@@ -1,17 +1,21 @@
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
-import { getPineconeIndex, pinecone } from './pinecone-client';
+import { getPineconeIndex } from './pinecone-client';
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
-import { Document } from 'langchain/document';
 import { PineconeClient, UpsertRequest } from '@pinecone-database/pinecone';
 import { OpenAIApi, Configuration } from 'openai';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 
-
+const getPDFName = (metadata: Record<string, any>) => {
+  const { info } = metadata;
+  const { Title, Author } = info;
+  return `${Title} by ${Author}`;
+};
 
 export const langchainPineconeUpsert = async (
   filePath: string,
   pineconeClient: PineconeClient,
+  fileName: string,
 ) => {
   // use pdfjs to load pdf
   // https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
@@ -39,10 +43,10 @@ export const langchainPineconeUpsert = async (
   await PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), {
     pineconeIndex,
     // todo make the namespace dynamic so we can store one namespace per pdf in pinecone
-    namespace: 'pdf-test',
+    namespace: fileName,
   });
 
-  throw new Error('done with pinecone upsert');
+  return pdf;
 };
 
 const openaiTextToVector = async (text: string) => {

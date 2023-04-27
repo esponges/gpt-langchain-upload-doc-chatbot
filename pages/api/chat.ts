@@ -63,12 +63,17 @@ export default async function handler(
   
   try {
     const pineconeClient = pinecone;
-    
-    // const vectorizedFile = await langchainPineconeUpsert(file.path, pineconeClient);
-    // const vectorizedFile = await pineconeUpsert(file.path, pineconeClient);
+    const isFirstUserMessage = history.length === 2;
+    const fileName = file.originalFilename;
+
+    // store vector in pinecone
+    if (isFirstUserMessage) {
+      await langchainPineconeUpsert(file.path, pineconeClient, fileName);
+      // const vectorizedFile = await pineconeUpsert(file.path, pineconeClient);
+    }
     
     //create chain for conversational AI
-    const chain = await makeChain(pineconeClient);
+    const chain = await makeChain(pineconeClient, fileName);
 
     //Ask a question using chat history
     const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
