@@ -130,6 +130,8 @@ export default function Home() {
     }
   };
 
+  const canUploadAttachment = !loading && !uploadedFile;
+
   return (
     <>
       <Layout>
@@ -137,7 +139,8 @@ export default function Home() {
           <h1 className="text-3xl font-bold leading-[1.1] tracking-tighter text-center">
             {uploadedFile && uploadedFile.name ? (
               <span className="text-blue-600">
-                Chat about the uploaded {uploadedFile.name} file
+                Chat about the uploaded{' '}
+                <span className="underline">{uploadedFile.name}</span> file
               </span>
             ) : (
               'Chat about any uploaded document'
@@ -150,15 +153,21 @@ export default function Home() {
               id="file"
               className="hidden"
               onChange={handleFileUpload}
+              disabled={!canUploadAttachment}
             />
             <label
               htmlFor="file"
-              className="flex items-center justify-center w-1/4 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className={`
+              flex items-center justify-center 
+              w-1/4 px-4 py-2 ${!canUploadAttachment ? 'cursor-not-allowed' : 'cursor-pointer'}
+              text-sm font-medium text-white bg-blue-600 border 
+              border-transparent rounded-md shadow-sm ${!canUploadAttachment ? 'hover:bg-gray-600' : 'hover:bg-blue-900'}
+              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
             >
               Upload a document
             </label>
             {uploadedFile && uploadedFile.name ? (
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-gray-500 underline mt-2">
                 {uploadedFile.name} uploaded
               </p>
             ) : null}
@@ -265,6 +274,7 @@ export default function Home() {
                         : 'Upload a document first'
                     }
                     value={query}
+                    /* dont set vals, use the form values so we do not rerender at every keystroke */
                     onChange={(e) => setQuery(e.target.value)}
                     className={styles.textarea}
                   />
@@ -291,22 +301,21 @@ export default function Home() {
                 </form>
               </div>
             </div>
-            {(error || !uploadedFile) ? (
-                <div className="border border-red-400 rounded-md p-4">
-                  <p className="text-red-500">
-                    {error || 'Please upload your file first to proceed'}
-                  </p>
-                </div>
-              ) : null}
+            {error || !uploadedFile ? (
+              <div className="border border-red-400 rounded-md p-4">
+                <p className="text-red-500">
+                  {error || 'Please upload your file first to proceed'}
+                </p>
+              </div>
+            ) : null}
           </main>
         </div>
-        <footer className="m-auto p-4">
-          <a href="https://twitter.com/mayowaoshin">
-            Powered by LangChainAI. Demo built on top of @mayowaoshin initial
-            project and adapted by{' '}
-            <a href="https://github.com/esponges" className="text-blue-500">
-              esponges
-            </a>
+        <footer className="m-auto p-4 text-xs">
+          Powered by LangChainAI. Demo built on top of
+          <a href="https://twitter.com/mayowaoshin">@mayowaoshin </a> initial
+          project and adapted by{' '}
+          <a href="https://github.com/esponges" className="text-blue-500">
+            esponges
           </a>
         </footer>
       </Layout>
