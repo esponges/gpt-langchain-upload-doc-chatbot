@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { makeChain } from '@/utils/makechain';
-import multiparty from 'multiparty';
-import { langchainPineconeUpsert, pineconeUpsert } from '@/utils/vectorizedFile';
+import { Form } from 'multiparty';
+import { langchainPineconeUpsert } from '@/utils/vectorizedFile';
 import { getPineconeExistingNamespaces, pinecone } from '@/utils/pinecone-client';
 
 export const config = {
@@ -34,7 +34,7 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   // will receive a FormData object
-  const form = new multiparty.Form();
+  const form = new Form();
   const formData = await new Promise<IFormData>((resolve, reject) => {
     form.parse(req, (err, fields, files) => {
       if (err) {

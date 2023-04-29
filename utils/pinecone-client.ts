@@ -33,8 +33,8 @@ export const getPineconeIndex = async (client?: PineconeClient) => {
     
     return pineconeIndex;
   } catch (error) {
-    console.log('error', error);
     
+    console.log('error', error);
     throw new Error('Failed to get Pinecone Index');
   }
 }

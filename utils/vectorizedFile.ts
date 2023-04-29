@@ -60,8 +60,6 @@ const openaiTextToVector = async (text: string) => {
   const openai = new OpenAIApi(configuration);
   const embeddings = await openai.createEmbedding({
     model: 'text-embedding-ada-002',
-    /* to do, figure out error in the open ai api using the normalized text */
-    // input: "the sad story of an ugly robot who didn't know how to love",
     input: normalized,
   });
 

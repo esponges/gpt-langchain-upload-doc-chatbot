@@ -148,7 +148,7 @@ export default function Home() {
           </h1>
           <div className="pl-4">
             <input
-              type="file"
+              type="pdf"
               name="file"
               id="file"
               className="hidden"
