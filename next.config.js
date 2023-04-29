@@ -3,7 +3,11 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   productionBrowserSourceMaps: true,
-  outputFileTracing: ['**canvas**'],
+  experimental: {
+    outputFileTracingExcludes: {
+      '*': ['node_modules/@esbuild/linux-x64'],
+    },
+  },
   webpack(config) {
     config.experiments = {
       ...config.experiments,
