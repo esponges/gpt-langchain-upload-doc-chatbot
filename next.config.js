@@ -4,9 +4,7 @@ const nextConfig = {
   swcMinify: true,
   productionBrowserSourceMaps: true,
   experimental: {
-    outputFileTracingExcludes: {
-      '*': ['node_modules/canvas/build'],
-    },
+    outputFileTracingIgnores: ['**canvas**'],
   },
   webpack(config) {
     config.experiments = {
