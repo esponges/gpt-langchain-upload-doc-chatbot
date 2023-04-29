@@ -4,7 +4,7 @@ const nextConfig = {
   swcMinify: true,
   productionBrowserSourceMaps: true,
   experimental: {
-    // outputFileTracingIgnores: ['**canvas**'],
+    outputFileTracingIgnores: ['**/@dqbd/tiktoken**'],
   },
   webpack(config) {
     config.experiments = {
