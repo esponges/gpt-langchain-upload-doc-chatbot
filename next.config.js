@@ -2,8 +2,13 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  productionBrowserSourceMaps: true,
   webpack(config) {
-    config.experiments = { ...config.experiments, topLevelAwait: true };
+    config.experiments = {
+      ...config.experiments,
+      topLevelAwait: true,
+      outputFileTracing: ['**canvas**'],
+    };
     return config;
   },
 };
