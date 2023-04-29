@@ -6,11 +6,7 @@ import { PineconeClient, UpsertRequest } from '@pinecone-database/pinecone';
 import { OpenAIApi, Configuration } from 'openai';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 
-const getPDFName = (metadata: Record<string, any>) => {
-  const { info } = metadata;
-  const { Title, Author } = info;
-  return `${Title} by ${Author}`;
-};
+const DOCS_MAX_LENGTH = 150;
 
 export const langchainPineconeUpsert = async (
   filePath: string,
@@ -25,8 +21,8 @@ export const langchainPineconeUpsert = async (
   });
 
   const pdf = await loader.load();
-  const content = pdf[0].pageContent;
-  const metadata = pdf[0].metadata;
+  // const content = pdf[0].pageContent;
+  // const metadata = pdf[0].metadata;
 
   // list collections - we'll use the first one which is the default for this example
   const pineconeIndex = await getPineconeIndex(pineconeClient);
@@ -38,6 +34,11 @@ export const langchainPineconeUpsert = async (
   });
 
   const docs = await textSplitter.splitDocuments(pdf);
+  
+  // todo: add threshold for big documents
+  if (docs.length > DOCS_MAX_LENGTH) {
+    throw new Error('Please upload a smaller document');
+  }
 
   // add documents to index
   await PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), {
