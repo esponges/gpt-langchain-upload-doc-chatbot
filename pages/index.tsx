@@ -148,9 +148,10 @@ export default function Home() {
           </h1>
           <div className="pl-4">
             <input
-              type="pdf"
+              type="file"
               name="file"
               id="file"
+              accept='application/pdf'
               className="hidden"
               onChange={handleFileUpload}
               disabled={!canUploadAttachment}
