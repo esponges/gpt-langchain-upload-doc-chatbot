@@ -311,10 +311,10 @@ export default function Home() {
           </main>
         </div>
         <footer className="m-auto p-4 text-xs">
-          Powered by LangChainAI. Demo built on top of
+          Powered by LangChainAI and gpt3-5. Demo built on top of
           <a href="https://twitter.com/mayowaoshin">@mayowaoshin </a> initial
           project and adapted by{' '}
-          <a href="https://github.com/esponges" className="text-blue-500">
+          <a href="https://fer-toasted.vercel.app/" className="text-blue-500">
             esponges
           </a>
         </footer>
