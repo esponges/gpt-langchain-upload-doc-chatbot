@@ -5,7 +5,7 @@ const nextConfig = {
   productionBrowserSourceMaps: true,
   experimental: {
     outputFileTracingExcludes: {
-      '*': ['node_modules/@esbuild/linux-x64'],
+      '*': ['node_modules/canvas/build'],
     },
   },
   webpack(config) {
