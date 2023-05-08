@@ -38,6 +38,16 @@ async function extractTextFromPDF(filePath: string): Promise<string> {
   return text;
 }
 
+/* 
+  * As per the docs https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
+  * we can use the PDFLoader to load a pdf from the file system, however this method require importing PDFLoader
+  * which when deploying in a serverless environment (vercel) makes the build fail because it exceeds the max size
+  * for a lambda function. So instead we use pdfjs-dist to load the pdf and extract the text from it.
+  * See vercel issue: https://github.com/orgs/vercel/discussions/103
+  * I'm not yet sure if this alternative method is optimal and I'm still trying to figure out how to use vectors
+  * instead of text to make the chain more efficient.
+*/
+
 export const langchainPineconeUpsert = async (
   filePath: string,
   pineconeClient: PineconeClient,
@@ -66,6 +76,7 @@ export const langchainPineconeUpsert = async (
   // const docs = await textSplitter.splitDocuments(pdf);
   const docs = [
     new Document({
+      // todo: figure out metadata
       metadata: { test: 'foo' },
       pageContent: pdfDistText,
     }),
