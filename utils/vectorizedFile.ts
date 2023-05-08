@@ -53,8 +53,6 @@ export const langchainPineconeUpsert = async (
   const pdfDistText = await extractTextFromPDF(filePath);
 
   // const pdf = await loader.load();
-  // const content = pdf[0].pageContent;
-  // const metadata = pdf[0].metadata;
 
   // list collections - we'll use the first one which is the default for this example
   const pineconeIndex = await getPineconeIndex(pineconeClient);
@@ -78,16 +76,9 @@ export const langchainPineconeUpsert = async (
     throw new Error('Please upload a smaller document');
   }
 
-  // throw new Error('indexed already');
-
   // add documents to index
   await PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), {
     pineconeIndex,
-    // todo make the namespace dynamic so we can store one namespace per pdf in pinecone
     namespace: fileName,
   });
-
-  // throw new Error('indexed');
-
-  // return pdf;
 };
