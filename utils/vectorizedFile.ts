@@ -22,9 +22,14 @@ async function extractTextFromPDF(filePath: string): Promise<string> {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
 
+    // had to add this since this type since I'd get a type error
+    // despite filtering out the items that don't have the str property
+    type StringItem = typeof content.items[0] & { str: string };
+
     const textItems = content.items.filter((item) =>
       item.hasOwnProperty('str'),
-    );
+    ) as StringItem[];
+
     const pageText = textItems.map((item) => item.str).join('');
 
     text += pageText;
