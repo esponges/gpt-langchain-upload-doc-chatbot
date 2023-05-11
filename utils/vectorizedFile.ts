@@ -1,9 +1,9 @@
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-// import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
+import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
 import { getPineconeIndex } from './pinecone-client';
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { PineconeClient } from '@pinecone-database/pinecone';
-// import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import * as fs from 'fs';
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 import { Document } from 'langchain/document';
@@ -55,32 +55,32 @@ export const langchainPineconeUpsert = async (
 ) => {
   // use pdfjs to load pdf
   // https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
-  // const loader = new PDFLoader(filePath, {
-  //   pdfjs: () => import('pdfjs-dist/legacy/build/pdf.js'),
-  //   splitPages: false,
-  // });
+  const loader = new PDFLoader(filePath, {
+    pdfjs: () => import('pdfjs-dist/legacy/build/pdf.js'),
+    splitPages: false,
+  });
 
-  const pdfDistText = await extractTextFromPDF(filePath);
+  // const pdfDistText = await extractTextFromPDF(filePath);
 
-  // const pdf = await loader.load();
+  const pdf = await loader.load();
 
   // list collections - we'll use the first one which is the default for this example
   const pineconeIndex = await getPineconeIndex(pineconeClient);
 
   /* Split text into chunks */
-  // const textSplitter = new RecursiveCharacterTextSplitter({
-  //   chunkSize: 1000,
-  //   chunkOverlap: 200,
-  // });
+  const textSplitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 1000,
+    chunkOverlap: 200,
+  });
 
-  // const docs = await textSplitter.splitDocuments(pdf);
-  const docs = [
-    new Document({
-      // todo: figure out metadata
-      metadata: { test: 'foo' },
-      pageContent: pdfDistText,
-    }),
-  ];
+  const docs = await textSplitter.splitDocuments(pdf);
+  // const docs = [
+  //   new Document({
+  //     // todo: figure out metadata
+  //     metadata: { test: 'foo' },
+  //     pageContent: pdfDistText,
+  //   }),
+  // ];
 
   // todo: add threshold for big documents
   if (docs.length > DOCS_MAX_LENGTH) {

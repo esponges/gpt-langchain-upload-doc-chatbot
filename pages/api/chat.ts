@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { makeChain } from '@/utils/makechain';
 import { Form } from 'multiparty';
-import { langchainPineconeUpsert } from '@/utils/vectorizedFile';
+// import { langchainPineconeUpsert } from '@/utils/vectorizedFile';
 import { getPineconeExistingNamespaces, pinecone } from '@/utils/pinecone-client';
 
 export const config = {
@@ -72,7 +72,7 @@ export default async function handler(
       const fileExistsInDB = await getPineconeExistingNamespaces(fileName, pineconeClient);
 
       if (!fileExistsInDB) {
-        await langchainPineconeUpsert(file.path, pineconeClient, fileName);
+        // await langchainPineconeUpsert(file.path, pineconeClient, fileName);
         // const vectorizedFile = await pineconeUpsert(file.path, pineconeClient);
       }
     }
