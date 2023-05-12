@@ -29,6 +29,7 @@ export const getPineconeIndex = async (client?: PineconeClient) => {
 
   try {
     const collections = await store.listIndexes();
+    console.log('collections', collections);
     const pineconeIndex = await store.Index(collections[0]);
     
     return pineconeIndex;

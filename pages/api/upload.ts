@@ -30,6 +30,8 @@ export default async function handler(
         reject(err);
         return;
       }
+
+      
       const file = files.file[0];
       resolve({ file });
     });
