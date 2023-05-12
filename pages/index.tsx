@@ -94,7 +94,6 @@ export default function Home() {
         const data = await response.json();
         console.log('response', data);
       }
-      return;
 
       const response = await fetch('/api/chat', {
         method: 'POST',
