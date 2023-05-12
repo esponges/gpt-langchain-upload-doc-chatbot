@@ -79,6 +79,23 @@ export default function Home() {
       formData.append('question', question);
       formData.append('history', JSON.stringify(history));
 
+      // const isUserFirstMessage 
+
+      const isUserFirstMessage = history.length === 0;
+
+      if (isUserFirstMessage) {
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+          // headers: {
+          //   'Content-Type': 'multipart/form-data',
+          // },
+        });
+        const data = await response.json();
+        console.log('response', data);
+      }
+      return;
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         body: formData,

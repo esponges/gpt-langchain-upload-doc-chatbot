@@ -2,7 +2,10 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { makeChain } from '@/utils/makechain';
 import { Form } from 'multiparty';
 // import { langchainPineconeUpsert } from '@/utils/vectorizedFile';
-import { getPineconeExistingNamespaces, pinecone } from '@/utils/pinecone-client';
+import {
+  getPineconeExistingNamespaces,
+  pinecone,
+} from '@/utils/pinecone-client';
 
 export const config = {
   api: {
@@ -47,7 +50,7 @@ export default async function handler(
       resolve({ question, history, file });
     });
   });
-  
+
   const { question, history, file } = formData;
 
   //only accept post requests
@@ -60,23 +63,26 @@ export default async function handler(
     return res.status(400).json({ message: 'No question in the request' });
   }
   // OpenAI recommends replacing newlines with spaces for best results
-  
+
   try {
     const pineconeClient = pinecone;
     const isFirstUserMessage = history.length === 2;
     const fileName = file.originalFilename;
 
     // store vector in pinecone
-    if (isFirstUserMessage ) {
+    if (isFirstUserMessage) {
       // figure if user has already uploaded this file before
-      const fileExistsInDB = await getPineconeExistingNamespaces(fileName, pineconeClient);
+      const fileExistsInDB = await getPineconeExistingNamespaces(
+        fileName,
+        pineconeClient,
+      );
 
       if (!fileExistsInDB) {
         // await langchainPineconeUpsert(file.path, pineconeClient, fileName);
         // const vectorizedFile = await pineconeUpsert(file.path, pineconeClient);
       }
     }
-    
+
     //create chain for conversational AI
     const chain = await makeChain(pineconeClient, fileName);
 
