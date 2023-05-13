@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Form } from 'multiparty';
+
 import { langchainPineconeUpsert } from '@/utils/vectorizedFile';
 import { getPineconeExistingNamespaces, pinecone } from '@/utils/pinecone-client';
 
@@ -9,9 +10,7 @@ export const config = {
   },
 };
 
-interface IFormData {
-  // question: string;
-  // history: string;
+interface FData {
   file: {
     fieldName: string;
     originalFilename: string;
@@ -23,8 +22,8 @@ interface IFormData {
   };
 }
 
-interface ApiFormDataRequest extends NextApiRequest {
-  body: IFormData;
+interface ApFDataRequest extends NextApiRequest {
+  body: FData;
 }
 
 export type UploadResponse = {
@@ -33,11 +32,11 @@ export type UploadResponse = {
 };
 
 export default async function handler(
-  req: ApiFormDataRequest,
+  req: ApFDataRequest,
   res: NextApiResponse,
 ) {
   const form = new Form();
-  const formData = await new Promise<IFormData>((resolve, reject) => {
+  const formData = await new Promise<FData>((resolve, reject) => {
     form.parse(req, (err, fields, files) => {
       if (err) {
         reject(err);
@@ -57,7 +56,12 @@ export default async function handler(
   );
 
   if (!fileExistsInDB) {
-    await langchainPineconeUpsert(formData.file.path, pinecone, fileName);
+    try {
+      await langchainPineconeUpsert(formData.file.path, pinecone, fileName);
+    } catch {
+      res.status(500).json({ error: 'Something went wrong' });
+      return;
+    }
   }
 
   const resData: UploadResponse = {

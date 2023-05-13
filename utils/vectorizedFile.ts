@@ -10,7 +10,11 @@ import { Document } from 'langchain/document';
 
 const DOCS_MAX_LENGTH = 150;
 
-// parse pdf into text
+/* 
+  * This is alternative to using pdfjs-dist, pdfjs-dist is the way that is mentioned
+  * by the langchain docs but (it adds the line breaks \n\n\ correctly) but I'm not sure
+  * if it's the best way to do it. I'm leaving this here for now in case I need to use it
+*/
 async function extractTextFromPDF(filePath: string): Promise<string> {
   const data = await fs.promises.readFile(filePath);
   const loadingTask = pdfjsLib.getDocument({ data });
@@ -38,16 +42,6 @@ async function extractTextFromPDF(filePath: string): Promise<string> {
   return text;
 }
 
-/* 
-  * As per the docs https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
-  * we can use the PDFLoader to load a pdf from the file system, however this method require importing PDFLoader
-  * which when deploying in a serverless environment (vercel) makes the build fail because it exceeds the max size
-  * for a lambda function. So instead we use pdfjs-dist to load the pdf and extract the text from it.
-  * See vercel issue: https://github.com/orgs/vercel/discussions/103
-  * I'm not yet sure if this alternative method is optimal and I'm still trying to figure out how to use vectors
-  * instead of text to make the chain more efficient.
-*/
-
 export const langchainPineconeUpsert = async (
   filePath: string,
   pineconeClient: PineconeClient,
@@ -59,21 +53,11 @@ export const langchainPineconeUpsert = async (
     pdfjs: () => import('pdfjs-dist/legacy/build/pdf.js'),
     splitPages: false,
   });
-
-  // const pdfDistText = await extractTextFromPDF(filePath);
-
+  
   const pdf = await loader.load();
 
-  // list collections - we'll use the first one which is the default for this example
-  const pineconeIndex = await getPineconeIndex(pineconeClient);
-
-  /* Split text into chunks */
-  const textSplitter = new RecursiveCharacterTextSplitter({
-    chunkSize: 1000,
-    chunkOverlap: 200,
-  });
-
-  const docs = await textSplitter.splitDocuments(pdf);
+  // const pdfDistText = await extractTextFromPDF(filePath);
+  
   // const docs = [
   //   new Document({
   //     // todo: figure out metadata
@@ -81,6 +65,19 @@ export const langchainPineconeUpsert = async (
   //     pageContent: pdfDistText,
   //   }),
   // ];
+
+
+  // list collections - we'll use the first one which is the default for this example
+  const pineconeIndex = await getPineconeIndex(pineconeClient);
+
+  // split into chunks
+  const textSplitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 1000,
+    chunkOverlap: 200,
+  });
+
+  const docs = await textSplitter.splitDocuments(pdf);
+
 
   // todo: add threshold for big documents
   if (docs.length > DOCS_MAX_LENGTH) {
