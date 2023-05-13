@@ -32,6 +32,7 @@ export default function Home() {
     history: [],
   });
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [nameSpace, setNameSpace] = useState<string>();
 
   const { messages, history } = messageState;
 
@@ -76,34 +77,39 @@ export default function Home() {
         formData.append('file', uploadedFile);
       }
       // also append question and history
-      formData.append('question', question);
-      formData.append('history', JSON.stringify(history));
-
-      // const isUserFirstMessage 
 
       const isUserFirstMessage = history.length === 0;
+
+      let fileName: string = '';
+      let uploadRes;
 
       if (isUserFirstMessage) {
         const response = await fetch('/api/upload', {
           method: 'POST',
           body: formData,
-          // headers: {
-          //   'Content-Type': 'multipart/form-data',
-          // },
         });
-        const data = await response.json();
-        console.log('response', data);
+        const uploadData = await response.json();
+
+        setNameSpace(uploadData.nameSpace);
+        fileName = uploadData.nameSpace as string;
+        uploadRes = uploadData;
       }
 
       const response = await fetch('/api/chat', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          question,
+          nameSpace: !!nameSpace ? nameSpace : uploadRes.nameSpace,
+          history,
+        }),
       });
-      const data = await response.json();
-      console.log('data', data);
+      const chatData = await response.json();
 
-      if (data.error) {
-        setError(data.error);
+      if (chatData.error) {
+        setError(chatData.error);
       } else {
         setMessageState((state) => ({
           ...state,
@@ -111,11 +117,11 @@ export default function Home() {
             ...state.messages,
             {
               type: 'apiMessage',
-              message: data.text,
-              sourceDocs: data.sourceDocuments,
+              message: chatData.text,
+              sourceDocs: chatData.sourceDocuments,
             },
           ],
-          history: [...state.history, [question, data.text]],
+          history: [...state.history, [question, chatData.text]],
         }));
       }
       console.log('messageState', messageState);
