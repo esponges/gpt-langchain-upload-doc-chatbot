@@ -10,8 +10,8 @@ export const config = {
 };
 
 interface IFormData {
-  question: string;
-  history: string;
+  // question: string;
+  // history: string;
   file: {
     fieldName: string;
     originalFilename: string;
@@ -27,6 +27,11 @@ interface ApiFormDataRequest extends NextApiRequest {
   body: IFormData;
 }
 
+export type UploadResponse = {
+  fileExistsInDB: boolean;
+  nameSpace: string;
+};
+
 export default async function handler(
   req: ApiFormDataRequest,
   res: NextApiResponse,
@@ -40,9 +45,7 @@ export default async function handler(
       }
 
       const file = files.file[0];
-      const question = fields.question[0];
-      const history = fields.history[0];
-      resolve({ question, history, file });
+      resolve({ file });
     });
   }); 
 
@@ -57,9 +60,10 @@ export default async function handler(
     await langchainPineconeUpsert(formData.file.path, pinecone, fileName);
   }
 
-  console.log(formData);
+  const resData: UploadResponse = {
+    fileExistsInDB,
+    nameSpace: fileName,
+  };
 
-  // await langchainPineconeUpsert('foo', pinecone, 'bar');
-
-  res.status(200).json({ fileExistsInDB, namesSpace: fileName });
+  res.status(200).json(resData);
 }
