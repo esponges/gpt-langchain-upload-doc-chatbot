@@ -6,9 +6,8 @@ import { PineconeClient } from '@pinecone-database/pinecone';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import * as fs from 'fs';
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
-import { Document } from 'langchain/document';
 
-const DOCS_MAX_LENGTH = 150;
+const DOCS_MAX_LENGTH = 1500;
 
 /* 
   * This is alternative to using pdfjs-dist, pdfjs-dist is the way that is mentioned
@@ -51,7 +50,6 @@ export const langchainPineconeUpsert = async (
   // https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
   const loader = new PDFLoader(filePath, {
     pdfjs: () => import('pdfjs-dist/legacy/build/pdf.js'),
-    splitPages: false,
   });
   
   const pdf = await loader.load();
@@ -88,5 +86,6 @@ export const langchainPineconeUpsert = async (
   await PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), {
     pineconeIndex,
     namespace: fileName,
+    textKey: 'text',
   });
 };

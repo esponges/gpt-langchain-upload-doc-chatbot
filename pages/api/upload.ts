@@ -59,6 +59,8 @@ export default async function handler(
     try {
       await langchainPineconeUpsert(formData.file.path, pinecone, fileName);
     } catch (error) {
+      // investigate this error: 
+      // 'PineconeClient: Error calling upsert: ErrorWithoutStackTrace: value must be a string, number, boolean or list of strings, got {} for field pdf.metadata'
       res.status(500).json({ error: 'Something went wrong' });
       return;
     }
