@@ -58,7 +58,7 @@ export default async function handler(
   if (!fileExistsInDB) {
     try {
       await langchainPineconeUpsert(formData.file.path, pinecone, fileName);
-    } catch {
+    } catch (error) {
       res.status(500).json({ error: 'Something went wrong' });
       return;
     }

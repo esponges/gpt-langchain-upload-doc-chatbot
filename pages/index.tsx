@@ -90,6 +90,10 @@ export default function Home() {
         });
         const uploadData = await response.json();
 
+        if (uploadData.error) {
+          throw new Error(uploadData.error);
+        }
+
         setNameSpace(uploadData.nameSpace);
         fileName = uploadData.nameSpace as string;
         uploadRes = uploadData;
