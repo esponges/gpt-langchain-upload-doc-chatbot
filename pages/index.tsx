@@ -162,42 +162,44 @@ export default function Home() {
     <>
       <Layout>
         <div className="mx-auto flex flex-col gap-4">
-          <h1 className="text-3xl font-bold leading-[1.1] tracking-tighter text-center">
-            {uploadedFile && uploadedFile.name ? (
-              <span className="text-blue-600">
-                Chat about the uploaded{' '}
-                <span className="underline">{uploadedFile.name}</span> file
-              </span>
-            ) : (
-              'Chat about any uploaded document'
-            )}
-          </h1>
-          <div className="pl-4">
-            <input
-              type="file"
-              name="file"
-              id="file"
-              accept='application/pdf'
-              className="hidden"
-              onChange={handleFileUpload}
-              disabled={!canUploadAttachment}
-            />
-            <label
-              htmlFor="file"
-              className={`
-              flex items-center justify-center 
-              w-1/4 px-4 py-2 ${!canUploadAttachment ? 'cursor-not-allowed' : 'cursor-pointer'}
-              text-sm font-medium text-white bg-blue-600 border 
-              border-transparent rounded-md shadow-sm ${!canUploadAttachment ? 'hover:bg-gray-600' : 'hover:bg-blue-900'}
-              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
-            >
-              Upload a document
-            </label>
-            {uploadedFile && uploadedFile.name ? (
-              <p className="text-sm text-gray-500 underline mt-2">
-                {uploadedFile.name} uploaded
-              </p>
-            ) : null}
+          <div className='w-[75vw]'>
+            <h1 className="text-3xl my-6 font-bold leading-[1.1] tracking-tighter text-center">
+              {uploadedFile && uploadedFile.name ? (
+                <span className="text-blue-600">
+                  Chat about the uploaded{' '}
+                  <span className="underline">{uploadedFile.name}</span> file
+                </span>
+              ) : (
+                'Chat about any uploaded document'
+              )}
+            </h1>
+            <div className="pl-4">
+              <input
+                type="file"
+                name="file"
+                id="file"
+                accept='application/pdf'
+                className="hidden"
+                onChange={handleFileUpload}
+                disabled={!canUploadAttachment}
+              />
+              <label
+                htmlFor="file"
+                className={`
+                flex items-center justify-center 
+                w-1/4 px-4 py-2 ${!canUploadAttachment ? 'cursor-not-allowed' : 'cursor-pointer'}
+                text-sm font-medium text-white bg-blue-600 border 
+                border-transparent rounded-md shadow-sm ${!canUploadAttachment ? 'hover:bg-gray-600' : 'hover:bg-blue-900'}
+                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+              >
+                Upload a document
+              </label>
+              {uploadedFile && uploadedFile.name ? (
+                <p className="text-sm text-gray-500 underline mt-2">
+                  {uploadedFile.name} uploaded
+                </p>
+              ) : null}
+            </div>
           </div>
           <main className={styles.main}>
             <div className={styles.cloud}>
@@ -337,13 +339,13 @@ export default function Home() {
             ) : null}
           </main>
         </div>
-        <footer className="m-auto p-4 text-xs">
+        <footer className="m-auto p-4 text-xs w-[50vw]">
           Powered by LangChainAI and gpt3-5. Demo built on top of
           <a href="https://twitter.com/mayowaoshin">@mayowaoshin </a> initial
           project and adapted by{' '}
           <a href="https://fer-toasted.vercel.app/" className="text-blue-500">
             esponges
-          </a>
+          </a> for the parse & upload to vector store feature.
         </footer>
       </Layout>
     </>

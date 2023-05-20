@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Form } from 'multiparty';
 
-import { langchainPineconeUpsert } from '@/utils/vectorizedFile';
-import { getPineconeExistingNamespaces, pinecone } from '@/utils/pinecone-client';
+import { langchainPineconeUpsert } from '@/utils/langchain';
+import { getPineconeExistingNamespaces, pinecone } from '@/utils/pinecone';
 import { getErrorMessage } from '@/utils/misc';
 
 export const config = {

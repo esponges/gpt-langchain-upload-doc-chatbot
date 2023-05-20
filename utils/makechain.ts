@@ -3,7 +3,7 @@ import { ConversationalRetrievalQAChain } from 'langchain/chains';
 
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { PineconeClient } from '@pinecone-database/pinecone';
-import { getPineconeIndex } from './pinecone-client';
+import { getPineconeIndex } from './pinecone';
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
 
 const CONDENSE_PROMPT = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.

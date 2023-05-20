@@ -1,6 +1,6 @@
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import type { UpsertRequest } from '@pinecone-database/pinecone';
-import { getPineconeIndex } from '@/utils/pinecone-client';
+import { getPineconeIndex } from '@/utils/pinecone';
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { OpenAI } from 'langchain';
 import { VectorDBQAChain } from 'langchain/chains';

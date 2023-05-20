@@ -2,7 +2,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { makeChain } from '@/utils/makechain';
 import {
   pinecone,
-} from '@/utils/pinecone-client';
+} from '@/utils/pinecone';
+import { getErrorMessage } from '@/utils/misc';
 
 
 interface IFormData {
@@ -47,8 +48,8 @@ export default async function handler(
     });
 
     res.status(200).json(response);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log('error creating chain', error);
-    res.status(500).json({ error: error.message || 'Something went wrong' });
+    res.status(500).json({ error: getErrorMessage(error) });
   }
 }
