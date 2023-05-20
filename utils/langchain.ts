@@ -38,7 +38,8 @@ const verifyDocumentPdfMetadata = (docs: Document[]): Document[] => {
             pdf: {
               ...doc.metadata.pdf,
               metadata: {
-                // todo: add proper metadata
+                // todo: add proper metadata, probably making the model to extract the metadata from each
+                // doc and then adding it here - consider it could be expensive -and slow- to do this
                 foo: 'bar',
               },
             },
@@ -134,7 +135,6 @@ const extractTextFromPDF = async (filePath: string): Promise<string> => {
 
   return text;
 };
-
 
 
 export abstract class BufferLoader extends BaseDocumentLoader {

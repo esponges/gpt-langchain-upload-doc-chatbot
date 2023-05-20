@@ -36,7 +36,7 @@ export const makeChain = async (pineconeClient: PineconeClient, namespace: strin
   );
   
   const model = new OpenAI({
-    temperature: 0.2, // increase temepreature to get more creative answers
+    temperature: 0.5, // increase temepreature to get more creative answers
     modelName: 'gpt-3.5-turbo', //change this to gpt-4 if you have access
     openAIApiKey: process.env.OPENAI_API_KEY,
   });

@@ -23,6 +23,10 @@ const toErrorWithMessage = (maybeError: unknown): ErrorWithMessage => {
   }
 }
 
+/* 
+  * The error object from the catch block is of the unknown type.
+  * This function will figure an error message from the error object.
+*/
 export const getErrorMessage = (error: unknown) => {
   return toErrorWithMessage(error).message
 }
