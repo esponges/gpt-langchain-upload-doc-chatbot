@@ -1,7 +1,4 @@
-import * as fs from 'fs';
 import { readFile } from 'fs/promises';
-
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
@@ -103,39 +100,6 @@ export const langchainPineconeUpsert = async (
     textKey: 'text',
   });
 };
-
-/*
- * This is alternative to using pdfjs-dist, pdfjs-dist is the way that is mentioned
- * by the langchain docs but (it adds the line breaks \n\n\ correctly) but I'm not sure
- * if it's the best way to do it. I'm leaving this here for now in case I need to use it
- */
-const extractTextFromPDF = async (filePath: string): Promise<string> => {
-  const data = await fs.promises.readFile(filePath);
-  const loadingTask = pdfjsLib.getDocument({ data });
-
-  const pdf = await loadingTask.promise;
-
-  let text = '';
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-
-    // had to add this since this type since I'd get a type error
-    // despite filtering out the items that don't have the str property
-    type StringItem = (typeof content.items)[0] & { str: string };
-
-    const textItems = content.items.filter((item) =>
-      item.hasOwnProperty('str'),
-    ) as StringItem[];
-
-    const pageText = textItems.map((item) => item.str).join('');
-
-    text += pageText;
-  }
-
-  return text;
-};
-
 
 export abstract class BufferLoader extends BaseDocumentLoader {
   constructor(public filePathOrBlob: string | Blob) {
