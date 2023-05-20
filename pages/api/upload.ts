@@ -3,6 +3,7 @@ import { Form } from 'multiparty';
 
 import { langchainPineconeUpsert } from '@/utils/vectorizedFile';
 import { getPineconeExistingNamespaces, pinecone } from '@/utils/pinecone-client';
+import { getErrorMessage } from '@/utils/misc';
 
 export const config = {
   api: {
@@ -59,9 +60,10 @@ export default async function handler(
     try {
       await langchainPineconeUpsert(formData.file.path, pinecone, fileName);
     } catch (error) {
+      const errMsg = getErrorMessage(error);
       // investigate this error: 
       // 'PineconeClient: Error calling upsert: ErrorWithoutStackTrace: value must be a string, number, boolean or list of strings, got {} for field pdf.metadata'
-      res.status(500).json({ error: 'Something went wrong' });
+      res.status(500).json({ error: errMsg });
       return;
     }
   }
