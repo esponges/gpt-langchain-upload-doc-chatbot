@@ -5,7 +5,7 @@ import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 
 import { pinecone } from '@/utils/pinecone';
 import { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE } from '@/config/pinecone';
-import { CustomPDFLoader } from '@/utils/langchain';
+import { CustomPDFLoader } from '@/utils/ingest';
 
 /* Name of directory to retrieve your files from */
 const filePath = 'public';
