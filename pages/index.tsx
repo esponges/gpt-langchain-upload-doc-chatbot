@@ -12,6 +12,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { getErrorMessage } from '@/utils/misc';
 
 export default function Home() {
   const [query, setQuery] = useState<string>('');
@@ -43,8 +44,7 @@ export default function Home() {
     textAreaRef.current?.focus();
   }, []);
 
-  //handle form submission
-  async function handleSubmit(e: any) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
     setError(null);
@@ -75,6 +75,8 @@ export default function Home() {
       const formData = new FormData();
       if (uploadedFile) {
         formData.append('file', uploadedFile);
+      } else {
+        throw new Error('No file uploaded - Maybe reload and try again?');
       }
       // also append question and history
 
@@ -136,15 +138,15 @@ export default function Home() {
       messageListRef.current?.scrollTo(0, messageListRef.current.scrollHeight);
     } catch (error) {
       setLoading(false);
-      setError('An error occurred while fetching the data. Please try again.');
+      setError(getErrorMessage(error));
       console.log('error', error);
     }
   }
 
   //prevent empty submissions
-  const handleEnter = (e: any) => {
+  const handleEnter = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && query) {
-      handleSubmit(e);
+      handleSubmit(e as any);
     } else if (e.key == 'Enter') {
       e.preventDefault();
     }
