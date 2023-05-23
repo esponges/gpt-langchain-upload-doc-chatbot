@@ -7,7 +7,7 @@ import { getErrorMessage } from '@/utils/misc';
 
 export const config = {
   api: {
-    bodyParser: false,
+    bodyParser: true,
   },
 };
 

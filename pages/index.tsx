@@ -79,7 +79,6 @@ export default function Home() {
         throw new Error('No file uploaded - Maybe reload and try again?');
       }
       // also append question and history
-
       const isUserFirstMessage = history.length === 0;
 
       let fileName: string = '';
@@ -90,7 +89,6 @@ export default function Home() {
         body: formData,
       });
       const testUploadData = await testResp.json();
-      console.log('testUploadData', testUploadData);
 
       if (isUserFirstMessage) {
         const response = await fetch('/api/upload', {

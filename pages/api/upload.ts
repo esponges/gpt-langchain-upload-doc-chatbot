@@ -36,8 +36,6 @@ export default async function handler(
   req: ApFDataRequest,
   res: NextApiResponse,
 ) {
-  // test route is working in Vercel
-  
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
@@ -62,7 +60,7 @@ export default async function handler(
     fileName,
     pinecone,
   );
-
+  
   if (!fileExistsInDB) {
     try {
       await langchainPineconeUpsert(formData.file.path, pinecone, fileName);
