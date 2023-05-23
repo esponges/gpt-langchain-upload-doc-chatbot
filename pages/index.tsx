@@ -71,6 +71,34 @@ export default function Home() {
     setQuery('');
 
     try {
+      // append the file to the form data
+      const formData = new FormData();
+      if (uploadedFile) {
+        formData.append('file', uploadedFile);
+      } else {
+        throw new Error('No file uploaded - Maybe reload and try again?');
+      }
+      const isUserFirstMessage = history.length === 0;
+
+      let fileName: string = '';
+      let uploadRes;
+
+      if (isUserFirstMessage) {
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const uploadData = await response.json();
+
+        if (uploadData.error) {
+          throw new Error(uploadData.error);
+        }
+
+        setNameSpace(uploadData.nameSpace);
+        fileName = uploadData.nameSpace as string;
+        uploadRes = uploadData;
+      }
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -78,6 +106,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           question,
+          nameSpace: !!nameSpace ? nameSpace : uploadRes.nameSpace,
           history,
         }),
       });
@@ -133,7 +162,7 @@ export default function Home() {
     <>
       <Layout>
         <div className="mx-auto flex flex-col gap-4">
-          <div className="w-[75vw]">
+          <div className='w-[75vw]'>
             <h1 className="text-3xl my-6 font-bold leading-[1.1] tracking-tighter text-center">
               {uploadedFile && uploadedFile.name ? (
                 <span className="text-blue-600">
@@ -149,7 +178,7 @@ export default function Home() {
                 type="file"
                 name="file"
                 id="file"
-                accept="application/pdf"
+                accept='application/pdf'
                 className="hidden"
                 onChange={handleFileUpload}
                 disabled={!canUploadAttachment}
@@ -158,15 +187,9 @@ export default function Home() {
                 htmlFor="file"
                 className={`
                 flex items-center justify-center 
-                w-1/4 px-4 py-2 ${
-                  !canUploadAttachment ? 'cursor-not-allowed' : 'cursor-pointer'
-                }
+                w-1/4 px-4 py-2 ${!canUploadAttachment ? 'cursor-not-allowed' : 'cursor-pointer'}
                 text-sm font-medium text-white bg-blue-600 border 
-                border-transparent rounded-md shadow-sm ${
-                  !canUploadAttachment
-                    ? 'hover:bg-gray-600'
-                    : 'hover:bg-blue-900'
-                }
+                border-transparent rounded-md shadow-sm ${!canUploadAttachment ? 'hover:bg-gray-600' : 'hover:bg-blue-900'}
                 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
               >
                 Upload a document
@@ -310,9 +333,7 @@ export default function Home() {
             {error || !uploadedFile ? (
               <div className="border border-red-400 rounded-md p-4">
                 <p className="text-red-500">
-                  {error
-                    ? `${error} - Please try again later or use a different file`
-                    : 'Please upload your file first to proceed'}
+                  {error ? `${error} - Please try again later or use a different file` : 'Please upload your file first to proceed'}
                 </p>
               </div>
             ) : null}
@@ -324,8 +345,7 @@ export default function Home() {
           project and adapted by{' '}
           <a href="https://fer-toasted.vercel.app/" className="text-blue-500">
             esponges
-          </a>{' '}
-          for the parse & upload to vector store feature.
+          </a> for the parse & upload to vector store feature.
         </footer>
       </Layout>
     </>
