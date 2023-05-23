@@ -36,6 +36,9 @@ export default async function handler(
   req: ApFDataRequest,
   res: NextApiResponse,
 ) {
+  // test route is working in Vercel
+  throw new Error('Assess the route is working in Vercel');
+
   const form = new Form();
   const formData = await new Promise<FData>((resolve, reject) => {
     form.parse(req, (err, fields, files) => {
@@ -61,8 +64,6 @@ export default async function handler(
       await langchainPineconeUpsert(formData.file.path, pinecone, fileName);
     } catch (error) {
       const errMsg = getErrorMessage(error);
-      // investigate this error: 
-      // 'PineconeClient: Error calling upsert: ErrorWithoutStackTrace: value must be a string, number, boolean or list of strings, got {} for field pdf.metadata'
       res.status(500).json({ error: errMsg });
       return;
     }
