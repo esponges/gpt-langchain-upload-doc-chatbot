@@ -37,7 +37,11 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   // test route is working in Vercel
-  throw new Error('Assess the route is working in Vercel');
+  
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
 
   const form = new Form();
   const formData = await new Promise<FData>((resolve, reject) => {

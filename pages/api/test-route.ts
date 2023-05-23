@@ -36,6 +36,12 @@ export default async function handler(
   req: ApFDataRequest,
   res: NextApiResponse,
 ) {
+  //only accept post requests
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
   // test route is working in Vercel
   throw new Error('Test route is working in Vercel');
 }
