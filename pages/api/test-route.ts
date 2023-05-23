@@ -5,12 +5,6 @@ import { langchainPineconeUpsert } from '@/utils/langchain';
 import { getPineconeExistingNamespaces, pinecone } from '@/utils/pinecone';
 import { getErrorMessage } from '@/utils/misc';
 
-export const config = {
-  api: {
-    bodyParser: true,
-  },
-};
-
 interface FData {
   file: {
     fieldName: string;
