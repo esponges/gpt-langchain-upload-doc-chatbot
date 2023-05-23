@@ -85,6 +85,13 @@ export default function Home() {
       let fileName: string = '';
       let uploadRes;
 
+      const testResp = await fetch('/api/test-route', {
+        method: 'POST',
+        body: formData,
+      });
+      const testUploadData = await testResp.json();
+      console.log('testUploadData', testUploadData);
+
       if (isUserFirstMessage) {
         const response = await fetch('/api/upload', {
           method: 'POST',
