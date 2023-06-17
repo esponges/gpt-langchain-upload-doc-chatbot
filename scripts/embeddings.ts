@@ -5,11 +5,14 @@ import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { OpenAI } from 'langchain';
 import { VectorDBQAChain } from 'langchain/chains';
 import { Document } from 'langchain/document';
+import { Configuration, OpenAIApi } from 'openai';
 
-export const run = async () => {
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+export const runLangChain = async () => {
   const embeddings = new OpenAIEmbeddings({
     timeout: 1000, // 1s timeout
-    openAIApiKey: process.env.OPENAI_API_KEY,
+    openAIApiKey: OPENAI_API_KEY,
   });
   /* Embed queries */
   const res = await embeddings.embedQuery(
@@ -46,6 +49,44 @@ export const run = async () => {
 };
 
 
+const configuration = new Configuration({
+  apiKey: OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
+
+const runContextualChatWithEmbeddings = async () => {
+  try {
+    const embeddings = await openai.createEmbedding({
+      model: 'text-embedding-ada-002',
+      input: 'There was a robot named R2D2 and he was a good robot',
+    });
+
+    const vectors = embeddings.data.data[0].embedding;
+    const context = vectors.join('\n');
+
+    // now use these vectors to give context to openai
+    const prompt = `With this context ${context} Answer this question: what's the name of this robot?`;
+
+    // todo: this doesn't work
+    // figure out how to combine vectors and natural language
+    const response = await openai.createCompletion({
+      model: 'text-davinci-003',
+      prompt,
+      temperature: 0.6
+    });
+
+    console.log('THE RESPONSE', response.data);
+
+  } catch (error) {
+    console.log('THE ERROR', error);
+  }
+};
+
+(async () => {
+  await runContextualChatWithEmbeddings();
+  console.log('ingestion complete');
+})();
+
 
 export const chat = async () => {
   const pineconeIndex = await getPineconeIndex();
@@ -77,7 +118,7 @@ export const chat = async () => {
 export const langchainEmbed = async () => {
   // const embeddings = new OpenAIEmbeddings({
   //   timeout: 1000, // 1s timeout
-  //   openAIApiKey: process.env.OPENAI_API_KEY,
+  //   openAIApiKey: ,
   // });
   // /* Embed queries */
   // const res = await embeddings.embedQuery(
