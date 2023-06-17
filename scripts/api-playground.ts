@@ -9,7 +9,7 @@ import { Configuration, OpenAIApi } from 'openai';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-export const runLangChain = async () => {
+export const upsertVectorInPineconeStore = async () => {
   const embeddings = new OpenAIEmbeddings({
     timeout: 1000, // 1s timeout
     openAIApiKey: OPENAI_API_KEY,
@@ -49,6 +49,8 @@ export const runLangChain = async () => {
 };
 
 
+
+
 const configuration = new Configuration({
   apiKey: OPENAI_API_KEY,
 });
@@ -82,13 +84,9 @@ const runContextualChatWithEmbeddings = async () => {
   }
 };
 
-(async () => {
-  await runContextualChatWithEmbeddings();
-  console.log('ingestion complete');
-})();
+// TODO: build a method that compares embeddings and uses an llm to answer questions about the embeddings
 
-
-export const chat = async () => {
+const runPineconeContextualChatLangChain = async () => {
   const pineconeIndex = await getPineconeIndex();
 
   console.log('pineconeIndex', pineconeIndex);
@@ -113,19 +111,7 @@ export const chat = async () => {
   console.log(response);
 };
 
-
-
-export const langchainEmbed = async () => {
-  // const embeddings = new OpenAIEmbeddings({
-  //   timeout: 1000, // 1s timeout
-  //   openAIApiKey: ,
-  // });
-  // /* Embed queries */
-  // const res = await embeddings.embedQuery(
-  //   'fercho is a nice guy who lives in guadalajara',
-  // );
-  // console.log(res);
-
+const langchainEmbed = async () => {
   const pineconeIndex = await getPineconeIndex();
 
   const docs = [
@@ -134,25 +120,33 @@ export const langchainEmbed = async () => {
       pageContent: "paco is a nice guy who lives in leon",
     }),
   ];
+
+  console.log('docs to save', docs);
   
+  // this will actually save the document in pinecone
+  // the docs wont be saved with a namespace unless you pass it in
   await PineconeStore.fromDocuments(docs, new OpenAIEmbeddings(), {
     pineconeIndex,
+    namespace: 'jun17', // this is optional
   });
 };
 
 // (async () => {
-//   await run();
-//   console.log('embed completed');
+//   await upsertVectorInPineconeStore();
+//   console.log('upsert completed');
+// })();
+
+// (async () => {
+//   await runContextualChatWithEmbeddings();
+//   console.log('ingestion complete');
 // })();
 
 (async () => {
-  await chat();
-  console.log('chat completed');
-}
-)();
-
+  await runPineconeContextualChatLangChain();
+  console.log('chat with langchain completed');
+})();
 
 // (async () => {
-//   await langchainEmbed();
-//   console.log('embed completed');
+// await langchainEmbed();
+//   console.log('embed with langchain completed');
 // })();

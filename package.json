@@ -13,7 +13,7 @@
     "lint": "eslint --ignore-path .gitignore \"**/*.+(ts|js|tsx)\"",
     "format": "prettier --ignore-path .gitignore \"**/*.+(ts|js|tsx)\" --write",
     "ingest": "tsx -r dotenv/config scripts/ingest-data.ts",
-    "embed": "tsx -r dotenv/config scripts/embeddings.ts"
+    "start-api-playground": "tsx -r dotenv/config scripts/api-playground.ts"
   },
   "dependencies": {
     "@microsoft/fetch-event-source": "^2.0.1",
