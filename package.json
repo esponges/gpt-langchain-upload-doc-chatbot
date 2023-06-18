@@ -13,7 +13,8 @@
     "lint": "eslint --ignore-path .gitignore \"**/*.+(ts|js|tsx)\"",
     "format": "prettier --ignore-path .gitignore \"**/*.+(ts|js|tsx)\" --write",
     "ingest": "tsx -r dotenv/config scripts/ingest-data.ts",
-    "start-api-playground": "tsx -r dotenv/config scripts/api-playground.ts"
+    "start-api-playground": "tsx -r dotenv/config scripts/api-playground.ts",
+    "start-chain": "tsx -r dotenv/config scripts/chain.ts"
   },
   "dependencies": {
     "@microsoft/fetch-event-source": "^2.0.1",
@@ -21,7 +22,8 @@
     "@radix-ui/react-accordion": "^1.1.1",
     "clsx": "^1.2.1",
     "dotenv": "^16.0.3",
-    "langchain": "0.0.55",
+    "hnswlib-node": "^1.4.2",
+    "langchain": "0.0.95",
     "lucide-react": "^0.125.0",
     "multiparty": "^4.2.3",
     "next": "13.2.3",
