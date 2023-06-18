@@ -15,7 +15,7 @@
     "ingest": "tsx -r dotenv/config scripts/ingest-data.ts",
     "start-api-playground": "tsx -r dotenv/config scripts/api-playground.ts",
     "start-chain": "tsx -r dotenv/config scripts/chain.ts",
-    "start-upsert": "tsx -r dotenv/config scripts/upsert.ts"
+    "start-upsert-vector-and-query": "tsx -r dotenv/config scripts/upsert-vector-and-query.ts"
   },
   "dependencies": {
     "@microsoft/fetch-event-source": "^2.0.1",

@@ -134,6 +134,8 @@ const runPineconeSimilarityQuery = async () => {
         namespace: PINECONE_NAMESPACE,
         vector: vectors,
         topK: 5,
+        includeMetadata: true,
+        includeValues: true,
       },
     });
 
