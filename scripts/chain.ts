@@ -8,7 +8,7 @@ import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
 import * as fs from 'fs';
 
 // it useas HNSWLib as a vectorstore and stores the file in memory
-export const runBuiltInMemory = async () => {
+export const runConversationWithMemoryDoc = async () => {
   /* Initialize the LLM to use to answer the question */
   const model = new OpenAI({});
   /* Load in the file we want to do question answering over */
@@ -43,6 +43,6 @@ export const runBuiltInMemory = async () => {
 };
 
 (async () => {
-  await runBuiltInMemory();
+  await runConversationWithMemoryDoc();
   console.log('chain completed');
 })();

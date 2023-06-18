@@ -14,7 +14,8 @@
     "format": "prettier --ignore-path .gitignore \"**/*.+(ts|js|tsx)\" --write",
     "ingest": "tsx -r dotenv/config scripts/ingest-data.ts",
     "start-api-playground": "tsx -r dotenv/config scripts/api-playground.ts",
-    "start-chain": "tsx -r dotenv/config scripts/chain.ts"
+    "start-chain": "tsx -r dotenv/config scripts/chain.ts",
+    "start-upsert": "tsx -r dotenv/config scripts/upsert.ts"
   },
   "dependencies": {
     "@microsoft/fetch-event-source": "^2.0.1",

@@ -10,7 +10,7 @@ import { CustomPDFLoader } from '@/utils/ingest';
 /* Name of directory to retrieve your files from */
 const filePath = 'public';
 
-export const run = async () => {
+export const runUpsertDirectoryFiles = async () => {
   try {
     /*load raw docs from the all files in the directory */
     const directoryLoader = new DirectoryLoader(filePath, {
@@ -46,6 +46,6 @@ export const run = async () => {
 };
 
 (async () => {
-  await run();
+  await runUpsertDirectoryFiles();
   console.log('ingestion complete');
 })();
