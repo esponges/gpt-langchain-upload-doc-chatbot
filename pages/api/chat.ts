@@ -9,6 +9,7 @@ import { PDFLoader } from 'langchain/document_loaders';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { HNSWLib } from 'langchain/vectorstores/hnswlib';
+import { Document } from 'langchain/document';
 
 
 interface IFormData {
@@ -42,15 +43,22 @@ export default async function handler(
   try {
     const model = new OpenAI({});
     /* Load in the file we want to do question answering over */
-    const loader = new PDFLoader('public/lotr-world-wars.pdf');
+    // const loader = new PDFLoader('public/lotr-world-wars.pdf');
   
-    const pdf = await loader.load();
-    /* Split the text into chunks */
-    const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
-    const docs = await textSplitter.splitDocuments(pdf);
-    console.log('the docs', docs);
+    // const pdf = await loader.load();
+    // /* Split the text into chunks */
+    // const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
+    // const docs = await textSplitter.splitDocuments(pdf);
+    const fakeDoc: Document = {
+      metadata: {
+        title: 'fake doc',
+      },
+      pageContent: 'Some fake content from a fake doc',
+    };
+
+    // console.log('the docs', docs);
     /* Create the vectorstore */
-    const vectorStore = await HNSWLib.fromDocuments(docs, new OpenAIEmbeddings());
+    const vectorStore = await HNSWLib.fromDocuments([fakeDoc], new OpenAIEmbeddings());
     
     const pineconeClient = pinecone;
     
