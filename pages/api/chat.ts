@@ -4,6 +4,11 @@ import {
   pinecone,
 } from '@/utils/pinecone';
 import { getErrorMessage } from '@/utils/misc';
+import { OpenAI } from 'langchain';
+import { PDFLoader } from 'langchain/document_loaders';
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
+import { HNSWLib } from 'langchain/vectorstores/hnswlib';
 
 
 interface IFormData {
@@ -32,6 +37,18 @@ export default async function handler(
   if (!question || typeof question !== 'string') {
     return res.status(400).json({ message: 'No question in the request' });
   }
+
+  const model = new OpenAI({});
+  /* Load in the file we want to do question answering over */
+  const loader = new PDFLoader('public/lotr-world-wars.pdf');
+
+  const pdf = await loader.load();
+  /* Split the text into chunks */
+  const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
+  const docs = await textSplitter.splitDocuments(pdf);
+  console.log('the docs', docs);
+  /* Create the vectorstore */
+  const vectorStore = await HNSWLib.fromDocuments(docs, new OpenAIEmbeddings());
   
   try {
     const pineconeClient = pinecone;
@@ -47,7 +64,7 @@ export default async function handler(
       chat_history: history || [],
     });
 
-    res.status(200).json(response);
+    res.status(200).json({ ...response, vectorStore });
   } catch (error: unknown) {
     console.log('error creating chain', error);
     res.status(500).json({ error: getErrorMessage(error) });
