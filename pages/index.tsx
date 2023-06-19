@@ -90,6 +90,8 @@ export default function Home() {
         });
         const uploadData = await response.json();
 
+        console.log('uploadData', uploadData);
+
         if (uploadData.error) {
           throw new Error(uploadData.error);
         }

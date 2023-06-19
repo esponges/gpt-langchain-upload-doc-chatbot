@@ -4,6 +4,11 @@ import { Form } from 'multiparty';
 import { langchainPineconeUpsert } from '@/utils/langchain';
 import { getPineconeExistingNamespaces, pinecone } from '@/utils/pinecone';
 import { getErrorMessage } from '@/utils/misc';
+import { OpenAI } from 'langchain';
+import { PDFLoader } from 'langchain/document_loaders';
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { HNSWLib } from 'langchain/vectorstores/hnswlib';
+import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 
 export const config = {
   api: {
@@ -61,20 +66,31 @@ export default async function handler(
     pinecone,
   );
   
-  if (!fileExistsInDB) {
-    try {
-      await langchainPineconeUpsert(formData.file.path, pinecone, fileName);
-    } catch (error) {
-      const errMsg = getErrorMessage(error);
-      res.status(500).json({ error: errMsg });
-      return;
-    }
-  }
+  // if (!fileExistsInDB) {
+  //   try {
+  //     await langchainPineconeUpsert(formData.file.path, pinecone, fileName);
+  //   } catch (error) {
+  //     const errMsg = getErrorMessage(error);
+  //     res.status(500).json({ error: errMsg });
+  //     return;
+  //   }
+  // }
+  const model = new OpenAI({});
+  /* Load in the file we want to do question answering over */
+  const loader = new PDFLoader('public/lotr-world-wars.pdf');
+
+  const pdf = await loader.load();
+  /* Split the text into chunks */
+  const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
+  const docs = await textSplitter.splitDocuments(pdf);
+  console.log('the docs', docs);
+  /* Create the vectorstore */
+  const vectorStore = await HNSWLib.fromDocuments(docs, new OpenAIEmbeddings());
 
   const resData: UploadResponse = {
     fileExistsInDB,
     nameSpace: fileName,
   };
 
-  res.status(200).json(resData);
+  res.status(200).json(vectorStore);
 }
