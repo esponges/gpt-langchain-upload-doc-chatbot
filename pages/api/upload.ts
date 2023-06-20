@@ -9,6 +9,7 @@ import { PDFLoader } from 'langchain/document_loaders';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { HNSWLib } from 'langchain/vectorstores/hnswlib';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
+import { Document } from 'langchain/document';
 
 export const config = {
   api: {
@@ -57,40 +58,48 @@ export default async function handler(
       const file = files.file[0];
       resolve({ file });
     });
-  }); 
+  });
 
   const fileName = formData.file.originalFilename;
 
-  const fileExistsInDB = await getPineconeExistingNamespaces(
-    fileName,
-    pinecone,
-  );
-  
-  // if (!fileExistsInDB) {
-  //   try {
-  //     await langchainPineconeUpsert(formData.file.path, pinecone, fileName);
-  //   } catch (error) {
-  //     const errMsg = getErrorMessage(error);
-  //     res.status(500).json({ error: errMsg });
-  //     return;
-  //   }
-  // }
-  const model = new OpenAI({});
-  /* Load in the file we want to do question answering over */
-  const loader = new PDFLoader('public/lotr-world-wars.pdf');
+  try {
+    const fileExistsInDB = await getPineconeExistingNamespaces(
+      fileName,
+      pinecone,
+    );
 
-  const pdf = await loader.load();
-  /* Split the text into chunks */
-  const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
-  const docs = await textSplitter.splitDocuments(pdf);
-  console.log('the docs', docs);
-  /* Create the vectorstore */
-  const vectorStore = await HNSWLib.fromDocuments(docs, new OpenAIEmbeddings());
+    // if (!fileExistsInDB) {
+    //   try {
+    //     await langchainPineconeUpsert(formData.file.path, pinecone, fileName);
+    //   } catch (error) {
+    //     const errMsg = getErrorMessage(error);
+    //     res.status(500).json({ error: errMsg });
+    //     return;
+    //   }
+    // }
+    const fakeDoc: Document = {
+      metadata: {
+        title: 'fake doc',
+      },
+      pageContent: 'Some fake content from a fake doc',
+    };
 
-  const resData: UploadResponse = {
-    fileExistsInDB,
-    nameSpace: fileName,
-  };
+    // console.log('the docs', docs);
+    /* Create the vectorstore */
+    const vectorStore = await HNSWLib.fromDocuments(
+      [fakeDoc],
+      new OpenAIEmbeddings(),
+    );
 
-  res.status(200).json(vectorStore);
+    const resData: UploadResponse = {
+      fileExistsInDB,
+      nameSpace: fileName,
+    };
+
+    res.status(200).json(vectorStore);
+  } catch (error) {
+    const errMsg = getErrorMessage(error);
+    res.status(500).json({ error: errMsg });
+    return;
+  }
 }

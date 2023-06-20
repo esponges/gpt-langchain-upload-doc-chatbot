@@ -83,23 +83,23 @@ export default function Home() {
       let fileName: string = '';
       let uploadRes;
 
-      // if (isUserFirstMessage) {
-      //   const response = await fetch('/api/upload', {
-      //     method: 'POST',
-      //     body: formData,
-      //   });
-      //   const uploadData = await response.json();
+      if (isUserFirstMessage) {
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const uploadData = await response.json();
 
-      //   console.log('uploadData', uploadData);
+        console.log('uploadData', uploadData);
 
-      //   if (uploadData.error) {
-      //     throw new Error(uploadData.error);
-      //   }
+        if (uploadData.error) {
+          throw new Error(uploadData.error);
+        }
 
-      //   setNameSpace(uploadData.nameSpace);
-      //   fileName = uploadData.nameSpace as string;
-      //   uploadRes = uploadData;
-      // }
+        setNameSpace(uploadData.nameSpace);
+        fileName = uploadData.nameSpace as string;
+        uploadRes = uploadData;
+      }
 
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -108,8 +108,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           question,
-          nameSpace,
-          // nameSpace: !!nameSpace ? nameSpace : uploadRes.nameSpace,
+          nameSpace: !!nameSpace ? nameSpace : uploadRes.nameSpace,
           history,
         }),
       });
