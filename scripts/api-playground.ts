@@ -9,48 +9,6 @@ import { Configuration, OpenAIApi } from 'openai';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-export const upsertVectorInPineconeStore = async () => {
-  const embeddings = new OpenAIEmbeddings({
-    timeout: 1000, // 1s timeout
-    openAIApiKey: OPENAI_API_KEY,
-  });
-  /* Embed queries */
-  const res = await embeddings.embedQuery(
-    'fercho is a nice guy who lives in guadalajara',
-  );
-  console.log(res);
-  /* Embed documents */
-  // const documentRes = await embeddings.embedDocuments([
-  //   'Hello world',
-  //   'Bye bye',
-  // ]);
-  // console.log({ documentRes });
-
-  const pineconeIndex = await getPineconeIndex();
-
-  const upsertRequest: UpsertRequest = {
-    vectors: [
-      {
-        // test
-        id: '2',
-        values: res,
-        // todo: figure out metadata error here
-        // metadata,
-        metadata: {
-          baz: 'baz',
-        },
-      },
-    ],
-    namespace: 'fercho-test-1',
-  };
-
-  const upsertResponse = await pineconeIndex.upsert({ upsertRequest });
-  console.log({ upsertResponse });
-};
-
-
-
-
 const configuration = new Configuration({
   apiKey: OPENAI_API_KEY,
 });
@@ -85,7 +43,6 @@ const runContextualChatWithEmbeddings = async () => {
 };
 
 // TODO: build a method that compares embeddings and uses an llm to answer questions about the embeddings
-
 const runPineconeContextualChatLangChain = async () => {
   const pineconeIndex = await getPineconeIndex();
 

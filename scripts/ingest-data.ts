@@ -7,9 +7,10 @@ import { pinecone } from '@/utils/pinecone';
 import { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE } from '@/config/pinecone';
 import { CustomPDFLoader } from '@/utils/ingest';
 
-/* Name of directory to retrieve your files from */
+// name of directory to retrieve your files from
 const filePath = 'public';
 
+// upsert directory files to pinecone using lanchain wrapper
 export const runUpsertDirectoryFiles = async () => {
   try {
     /*load raw docs from the all files in the directory */

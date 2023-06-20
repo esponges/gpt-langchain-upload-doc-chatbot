@@ -2,6 +2,7 @@ import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import type { UpsertRequest } from '@pinecone-database/pinecone';
 import { getPineconeIndex } from '@/utils/pinecone';
 import { getErrorMessage } from '@/utils/misc';
+import { cities } from './data/vector';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const PINECONE_NAMESPACE = 'european-cities';
@@ -10,43 +11,6 @@ const PINECONE_NAMESPACE = 'european-cities';
 //   apiKey: OPENAI_API_KEY,
 // });
 // const openai = new OpenAIApi(configuration);
-
-const EUROPEAN_CITIES = [
-  'Paris',
-  'Berlin',
-  'Prague',
-  'Rome',
-  'Milan',
-  'Naples',
-  'Madrid',
-  'Barcelona',
-  'Sevilla',
-  'Lisbon',
-  'Porto',
-  'London',
-  'Manchester',
-  'Liverpool',
-  'Dublin',
-  'Amsterdam',
-  'Rotterdam',
-  'Brussels',
-  'Antwerp',
-  'Copenhagen',
-  'Stockholm',
-  'Oslo',
-  'Helsinki',
-  'Warsaw',
-  'Krakow',
-  'Budapest',
-  'Vienna',
-  'Zurich',
-  'Geneva',
-  'Munich',
-  'Hamburg',
-  'Cologne',
-  'Frankfurt',
-  'Stuttgart',
-];
 
 // upsert into a new or existing namespace in pinecone
 // when using one namespace we make sure that the vectors are
@@ -58,7 +22,7 @@ const upsertVectorGroupInPineconeStore = async () => {
 
   const vectors = [];
   // create one vector per city
-  for (const city of EUROPEAN_CITIES) {
+  for (const city of cities.toVectorize) {
     const res = await embeddings.embedQuery(city);
     vectors.push({
       id: city,
@@ -77,12 +41,13 @@ const upsertVectorGroupInPineconeStore = async () => {
   // create the upsert request
   const upsertRequest: UpsertRequest = {
     vectors,
-    namespace: PINECONE_NAMESPACE,
+    namespace: cities.nameSpace,
   };
 
   // upsert the vectors in pinecone
   try {
     console.log('upserting vectors in pinecone');
+    // could also be done with PineStore.addVectors however I think you cannot add metadata and ids
     const upsertResponse = await pineconeIndex.upsert({ upsertRequest });
     console.log('sucessful upsertResponse', { upsertResponse });
   } catch (e) {
@@ -102,7 +67,7 @@ const runPineconeSimilarityQuery = async () => {
     modelName: 'text-embedding-ada-002',
   });
 
-  const query = 'Cities where French is spoken';
+  const query = 'Cities that dont have a team that won the champions league';
   
   
   let vectors;
@@ -129,6 +94,8 @@ const runPineconeSimilarityQuery = async () => {
   const pineconeIndex = await getPineconeIndex();
 
   try {
+    // in the PineconeStore declaration there's a similaritySearchVectorWith score
+    // method that should do similar, however I don't think it's exported
     const pineconeResult = await pineconeIndex.query({
       queryRequest: {
         namespace: PINECONE_NAMESPACE,
