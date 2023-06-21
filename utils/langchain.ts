@@ -10,7 +10,6 @@ import { Document } from 'langchain/document';
 
 import { PineconeClient } from '@pinecone-database/pinecone';
 import { PrismaClient } from '@prisma/client';
-import { randomUUID } from 'crypto';
 
 const DOCS_MAX_LENGTH = 150;
 
@@ -90,25 +89,6 @@ export const langchainPineconeUpsert = async (
   const docs = await textSplitter.splitDocuments(pdf);
   const verifiedDocs = verifyDocumentPdfMetadata(docs);
 
-  const uuid = randomUUID();
-  const prismaUpload = await prisma.langChainDocs.create({
-    data: {
-      id: uuid,
-      name: fileName,
-      nameSpace: 'someNameSpace',
-      docs: {
-        create: docs.map((doc) => ({
-          name: fileName,
-          metadata: doc.metadata.toString() as string,
-          // metadata: 'foo',
-          // pageContent: doc.pageContent as string,
-          // langChainDocsId: uuid,
-          pageContent: 'bar',
-        })),
-      },
-    },
-  });
-
   console.log(docs);
   // todo: add threshold for big documents
   if (docs.length > DOCS_MAX_LENGTH) {
@@ -120,6 +100,43 @@ export const langchainPineconeUpsert = async (
     pineconeIndex,
     namespace: fileName,
     textKey: 'text',
+  });
+};
+
+export const langchainPrismaUpload = async (
+  filePath: string,
+  pineconeClient: PineconeClient,
+  fileName: string,
+) => {
+  // use pdfjs to load pdf
+  // https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
+  const loader = new PDFLoader(filePath, {
+    pdfjs: () => import('pdfjs-dist/legacy/build/pdf.js'),
+  });
+
+  const pdf = await loader.load();
+
+  // split into chunks
+  const textSplitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 1000,
+    chunkOverlap: 200,
+  });
+
+  // this outputs an array of Document objects
+  const docs = await textSplitter.splitDocuments(pdf);
+
+  await prisma.langChainDocs.create({
+    data: {
+      name: fileName,
+      nameSpace: 'someNameSpace',
+      docs: {
+        create: docs.map((doc) => ({
+          name: fileName,
+          metadata: JSON.stringify(doc.metadata),
+          pageContent: doc.pageContent,
+        })),
+      },
+    },
   });
 };
 
