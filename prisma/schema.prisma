@@ -10,9 +10,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-model Docs {
-  id        Int      @id @default(autoincrement())
+model LangChainDocs {
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   name      String
   nameSpace String
@@ -20,10 +19,11 @@ model Docs {
 }
 
 model Doc {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  name      String
-  nameSpace String
-  docs      Docs     @relation(fields: [docsId], references: [id])
-  docsId    Int
+  id              String        @id @default(uuid())
+  createdAt       DateTime      @default(now())
+  metadata        String // json string
+  pageContent     String
+  name            String
+  docs            LangChainDocs @relation(fields: [langChainDocsId], references: [id])
+  langChainDocsId String
 }
