@@ -9,6 +9,8 @@ import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { Document } from 'langchain/document';
 
 import { PineconeClient } from '@pinecone-database/pinecone';
+import { PrismaClient } from '@prisma/client';
+import { randomUUID } from 'crypto';
 
 const DOCS_MAX_LENGTH = 150;
 
@@ -51,6 +53,7 @@ const verifyDocumentPdfMetadata = (docs: Document[]): Document[] => {
   return verifiedDocs;
 };
 
+const prisma = new PrismaClient();
 
 export const langchainPineconeUpsert = async (
   filePath: string,
@@ -86,6 +89,25 @@ export const langchainPineconeUpsert = async (
 
   const docs = await textSplitter.splitDocuments(pdf);
   const verifiedDocs = verifyDocumentPdfMetadata(docs);
+
+  const uuid = randomUUID();
+  const prismaUpload = await prisma.langChainDocs.create({
+    data: {
+      id: uuid,
+      name: fileName,
+      nameSpace: 'someNameSpace',
+      docs: {
+        create: docs.map((doc) => ({
+          name: fileName,
+          metadata: doc.metadata.toString() as string,
+          // metadata: 'foo',
+          // pageContent: doc.pageContent as string,
+          // langChainDocsId: uuid,
+          pageContent: 'bar',
+        })),
+      },
+    },
+  });
 
   console.log(docs);
   // todo: add threshold for big documents
