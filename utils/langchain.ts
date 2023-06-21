@@ -3,13 +3,13 @@ import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
-import { getPineconeIndex } from './pinecone';
 import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { Document } from 'langchain/document';
 
 import { PineconeClient } from '@pinecone-database/pinecone';
-import { PrismaClient } from '@prisma/client';
+import { getPineconeIndex } from './pinecone';
+import { prisma } from './prisma';
 
 const DOCS_MAX_LENGTH = 150;
 
@@ -52,7 +52,6 @@ const verifyDocumentPdfMetadata = (docs: Document[]): Document[] => {
   return verifiedDocs;
 };
 
-const prisma = new PrismaClient();
 
 export const langchainPineconeUpsert = async (
   filePath: string,

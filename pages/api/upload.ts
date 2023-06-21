@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Form } from 'multiparty';
+import { PrismaClient } from '@prisma/client';
 
-import { langchainPineconeUpsert } from '@/utils/langchain';
+import { langchainPineconeUpsert, langchainPrismaUpload } from '@/utils/langchain';
 import { getPineconeExistingNamespaces, pinecone } from '@/utils/pinecone';
 import { getErrorMessage } from '@/utils/misc';
 import { OpenAI } from 'langchain';
@@ -10,12 +11,15 @@ import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { HNSWLib } from 'langchain/vectorstores/hnswlib';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { Document } from 'langchain/document';
+import { checkExistingFileInDB } from '@/utils/prisma';
 
 export const config = {
   api: {
     bodyParser: false,
   },
 };
+
+const prisma = new PrismaClient();
 
 interface FData {
   file: {
@@ -63,40 +67,24 @@ export default async function handler(
   const fileName = formData.file.originalFilename;
 
   try {
-    const fileExistsInDB = await getPineconeExistingNamespaces(
-      fileName,
-      pinecone,
-    );
+    const fileExistsInDB = await checkExistingFileInDB(fileName);
 
-    // if (!fileExistsInDB) {
-    //   try {
-    //     await langchainPineconeUpsert(formData.file.path, pinecone, fileName);
-    //   } catch (error) {
-    //     const errMsg = getErrorMessage(error);
-    //     res.status(500).json({ error: errMsg });
-    //     return;
-    //   }
-    // }
-    const fakeDoc: Document = {
-      metadata: {
-        title: 'fake doc',
-      },
-      pageContent: 'Some fake content from a fake doc',
-    };
-
-    // console.log('the docs', docs);
-    /* Create the vectorstore */
-    const vectorStore = await HNSWLib.fromDocuments(
-      [fakeDoc],
-      new OpenAIEmbeddings(),
-    );
+    if (!fileExistsInDB) {
+      try {
+        await langchainPrismaUpload(formData.file.path, pinecone, fileName);
+      } catch (error) {
+        const errMsg = getErrorMessage(error);
+        res.status(500).json({ error: errMsg });
+        return;
+      }
+    }
 
     const resData: UploadResponse = {
-      fileExistsInDB,
+      fileExistsInDB: !!fileExistsInDB,
       nameSpace: fileName,
     };
 
-    res.status(200).json(vectorStore);
+    res.status(200).json(resData);
   } catch (error) {
     const errMsg = getErrorMessage(error);
     res.status(500).json({ error: errMsg });
