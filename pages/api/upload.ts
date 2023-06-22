@@ -2,15 +2,9 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { Form } from 'multiparty';
 import { PrismaClient } from '@prisma/client';
 
-import { langchainPineconeUpsert, langchainPrismaUpload } from '@/utils/langchain';
-import { getPineconeExistingNamespaces, pinecone } from '@/utils/pinecone';
+import { langchainPrismaUpload } from '@/utils/langchain';
+import { pinecone } from '@/utils/pinecone';
 import { getErrorMessage } from '@/utils/misc';
-import { OpenAI } from 'langchain';
-import { PDFLoader } from 'langchain/document_loaders';
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
-import { HNSWLib } from 'langchain/vectorstores/hnswlib';
-import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { Document } from 'langchain/document';
 import { checkExistingFileInDB } from '@/utils/prisma';
 
 export const config = {
