@@ -61,21 +61,11 @@ export default async function handler(
       return res.status(400).json({ message: 'No documents found in the DB' });
     }
 
-    const fakeDoc: Document = {
-      metadata: {
-        title: 'fake doc',
-      },
-      pageContent: 'Some fake content from a fake doc',
-    };
-
-    // console.log('the docs', docs);
-    /* Create the vectorstore */
-    const vectorStore = await HNSWLib.fromDocuments([fakeDoc], new OpenAIEmbeddings());
-    
-    const pineconeClient = pinecone;
+    // create a local store for the vectors embeddings
+    const HNSWStore = await HNSWLib.fromDocuments(documents, new OpenAIEmbeddings());
     
     //create chain for conversational AI
-    const chain = await makeChain(pineconeClient, nameSpace);
+    const chain = await makeChain(HNSWStore);
     
     //Ask a question using chat history
     // OpenAI recommends replacing newlines with spaces for best results
@@ -85,7 +75,7 @@ export default async function handler(
       chat_history: history || [],
     });
 
-    res.status(200).json({ ...response, vectorStore });
+    res.status(200).json({ ...response, vectorStore: HNSWStore });
   } catch (error: unknown) {
     console.log('error creating chain', error);
     res.status(500).json({ error: getErrorMessage(error) });

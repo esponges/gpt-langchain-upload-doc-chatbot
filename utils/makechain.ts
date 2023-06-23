@@ -1,10 +1,6 @@
 import { OpenAI } from 'langchain/llms/openai';
 import { ConversationalRetrievalQAChain } from 'langchain/chains';
-
-import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
-import { PineconeClient } from '@pinecone-database/pinecone';
-import { getPineconeIndex } from './pinecone';
-import { PineconeStore } from 'langchain/vectorstores/pinecone';
+import { VectorStore } from 'langchain/dist/vectorstores/base';
 
 const CONDENSE_PROMPT = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question.
 
@@ -22,19 +18,7 @@ If the question is not related to the context, politely respond that you are tun
 Question: {question}
 Helpful answer in markdown:`;
 
-export const makeChain = async (pineconeClient: PineconeClient, namespace: string) => {
-  const pineconeIndex = await getPineconeIndex(pineconeClient);
-
-  const vectorStore = await PineconeStore.fromExistingIndex(
-    new OpenAIEmbeddings(),
-    {
-      pineconeIndex,
-      // make this dynamic so we can store one namespace per pdf in pinecone
-      // without this value the information won't be found by the retriever
-      namespace,
-    },
-  );
-  
+export const makeChain = async (vectorStore: VectorStore) => {
   const model = new OpenAI({
     temperature: 0.9, // increase temepreature to get more creative answers
     modelName: 'gpt-3.5-turbo', //change this to gpt-4 if you have access
