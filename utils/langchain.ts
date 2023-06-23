@@ -1,14 +1,14 @@
 import * as fs from 'fs';
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 
-// import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
+import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
-// import { PineconeStore } from 'langchain/vectorstores/pinecone';
+import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { Document } from 'langchain/document';
 
 import { PineconeClient } from '@pinecone-database/pinecone';
-// import { getPineconeIndex } from './pinecone';
+import { getPineconeIndex } from './pinecone';
 import { prisma } from './prisma';
 
 const DOCS_MAX_LENGTH = 150;
@@ -53,54 +53,54 @@ const verifyDocumentPdfMetadata = (docs: Document[]): Document[] => {
 };
 
 
-// export const langchainPineconeUpsert = async (
-//   filePath: string,
-//   pineconeClient: PineconeClient,
-//   fileName: string,
-// ) => {
-//   // use pdfjs to load pdf
-//   // https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
-//   const loader = new PDFLoader(filePath, {
-//     pdfjs: () => import('pdfjs-dist/legacy/build/pdf.js'),
-//   });
+export const langchainPineconeUpsert = async (
+  filePath: string,
+  pineconeClient: PineconeClient,
+  fileName: string,
+) => {
+  // use pdfjs to load pdf
+  // https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
+  const loader = new PDFLoader(filePath, {
+    pdfjs: () => import('pdfjs-dist/legacy/build/pdf.js'),
+  });
 
-//   const pdf = await loader.load();
+  const pdf = await loader.load();
 
-//   // const pdfDistText = await extractTextFromPDF(filePath);
+  // const pdfDistText = await extractTextFromPDF(filePath);
 
-//   // const docs = [
-//   //   new Document({
-//   //     // todo: figure out metadata
-//   //     metadata: { test: 'foo' },
-//   //     pageContent: pdfDistText,
-//   //   }),
-//   // ];
+  // const docs = [
+  //   new Document({
+  //     // todo: figure out metadata
+  //     metadata: { test: 'foo' },
+  //     pageContent: pdfDistText,
+  //   }),
+  // ];
 
-//   // list collections - we'll use the first one which is the default for this example
-//   const pineconeIndex = await getPineconeIndex(pineconeClient);
+  // list collections - we'll use the first one which is the default for this example
+  const pineconeIndex = await getPineconeIndex(pineconeClient);
 
-//   // split into chunks
-//   const textSplitter = new RecursiveCharacterTextSplitter({
-//     chunkSize: 1000,
-//     chunkOverlap: 200,
-//   });
+  // split into chunks
+  const textSplitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 1000,
+    chunkOverlap: 200,
+  });
 
-//   const docs = await textSplitter.splitDocuments(pdf);
-//   const verifiedDocs = verifyDocumentPdfMetadata(docs);
+  const docs = await textSplitter.splitDocuments(pdf);
+  const verifiedDocs = verifyDocumentPdfMetadata(docs);
 
-//   console.log(docs);
-//   // todo: add threshold for big documents
-//   if (docs.length > DOCS_MAX_LENGTH) {
-//     throw new Error('Please upload a smaller document');
-//   }
+  console.log(docs);
+  // todo: add threshold for big documents
+  if (docs.length > DOCS_MAX_LENGTH) {
+    throw new Error('Please upload a smaller document');
+  }
 
-//   // add documents to index
-//   await PineconeStore.fromDocuments(verifiedDocs, new OpenAIEmbeddings(), {
-//     pineconeIndex,
-//     namespace: fileName,
-//     textKey: 'text',
-//   });
-// };
+  // add documents to index
+  await PineconeStore.fromDocuments(verifiedDocs, new OpenAIEmbeddings(), {
+    pineconeIndex,
+    namespace: fileName,
+    textKey: 'text',
+  });
+};
 
 export const langchainPrismaUpload = async (
   filePath: string,
