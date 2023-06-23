@@ -1,10 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { makeChain } from '@/utils/makechain';
-import {
-  pinecone,
-} from '@/utils/pinecone';
 import { getErrorMessage } from '@/utils/misc';
-import { OpenAI } from 'langchain';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { HNSWLib } from 'langchain/vectorstores/hnswlib';
 import { Document } from 'langchain/document';
