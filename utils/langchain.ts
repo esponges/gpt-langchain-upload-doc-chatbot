@@ -127,7 +127,7 @@ export const langchainPrismaUpload = async (
   await prisma.langChainDocs.create({
     data: {
       name: fileName,
-      nameSpace: 'someNameSpace',
+      nameSpace: fileName,
       docs: {
         create: docs.map((doc) => ({
           name: fileName,

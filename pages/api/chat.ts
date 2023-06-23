@@ -8,6 +8,7 @@ import { OpenAI } from 'langchain';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { HNSWLib } from 'langchain/vectorstores/hnswlib';
 import { Document } from 'langchain/document';
+import { getDocumentsFromDB } from '@/utils/prisma';
 
 
 interface IFormData {
@@ -39,7 +40,6 @@ export default async function handler(
 
   
   try {
-    const model = new OpenAI({});
     /* Load in the file we want to do question answering over */
     // const loader = new PDFLoader('public/lotr-world-wars.pdf');
   
@@ -47,6 +47,20 @@ export default async function handler(
     // /* Split the text into chunks */
     // const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
     // const docs = await textSplitter.splitDocuments(pdf);
+    const sqlDocs = await getDocumentsFromDB(nameSpace);
+    const documents: Document<Record<string, any>>[] | null = sqlDocs?.docs.map((doc) => {
+      const { id, createdAt, metadata, pageContent, name, langChainDocsId } = doc;
+      const document = new Document({
+        pageContent,
+        metadata: JSON.parse(metadata),
+      });
+      return document;
+    }) ?? null;
+
+    if (!documents) {
+      return res.status(400).json({ message: 'No documents found in the DB' });
+    }
+
     const fakeDoc: Document = {
       metadata: {
         title: 'fake doc',

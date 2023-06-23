@@ -4,7 +4,8 @@ const nextConfig = {
   swcMinify: true,
   productionBrowserSourceMaps: true,
   experimental: {
-    outputFileTracingIgnores: ['**@dqbd/tiktoken**'],
+    // this opt it would apparently help with build size but it didn't
+    // outputFileTracingIgnores: ['**@dqbd/tiktoken**'],
   },
   webpack(config) {
     config.experiments = {
