@@ -61,7 +61,7 @@ export const langchainPineconeUpsert = async (
   // use pdfjs to load pdf
   // https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
   const loader = new PDFLoader(filePath, {
-    pdfjs: () => import('pdfjs-dist/legacy/build/pdf.js'),
+    // pdfjs: () => import('pdfjs-dist/legacy/build/pdf.js'),
   });
 
   const pdf = await loader.load();
