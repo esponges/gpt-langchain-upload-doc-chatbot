@@ -8,14 +8,14 @@ import { getDocumentsFromDB } from '@/utils/prisma';
 import { AIChatMessage, BaseChatMessage, HumanChatMessage } from 'langchain/schema';
 
 
-interface IFormData {
+interface ReqBody {
   question: string;
   history: Array<Array<string>>;
   nameSpace: string;
 }
 
 interface ApiFormDataRequest extends NextApiRequest {
-  body: IFormData;
+  body: ReqBody;
 }
 
 export default async function handler(
@@ -39,21 +39,16 @@ export default async function handler(
   // solution found here https://github.com/hwchase17/langchainjs/issues/1573#issuecomment-1582636486
   let chatHistory: BaseChatMessage[] = [];
   history?.forEach((_, idx) => {
+    // first message is always human message
     chatHistory.push(new HumanChatMessage(history[idx][0]));
+    // second message is always AI response
     chatHistory.push(new AIChatMessage(history[idx][1]));
   });
     
   try {
-    /* Load in the file we want to do question answering over */
-    // const loader = new PDFLoader('public/lotr-world-wars.pdf');
-  
-    // const pdf = await loader.load();
-    // /* Split the text into chunks */
-    // const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
-    // const docs = await textSplitter.splitDocuments(pdf);
     const sqlDocs = await getDocumentsFromDB(nameSpace);
     const documents: Document<Record<string, any>>[] | null = sqlDocs?.docs.map((doc) => {
-      const { id, createdAt, metadata, pageContent, name, langChainDocsId } = doc;
+      const { metadata, pageContent } = doc;
       const document = new Document({
         pageContent,
         metadata: JSON.parse(metadata),
