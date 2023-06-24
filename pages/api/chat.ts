@@ -5,11 +5,12 @@ import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { HNSWLib } from 'langchain/vectorstores/hnswlib';
 import { Document } from 'langchain/document';
 import { getDocumentsFromDB } from '@/utils/prisma';
+import { AIChatMessage, BaseChatMessage, HumanChatMessage } from 'langchain/schema';
 
 
 interface IFormData {
   question: string;
-  history: string;
+  history: Array<Array<string>>;
   nameSpace: string;
 }
 
@@ -34,7 +35,14 @@ export default async function handler(
     return res.status(400).json({ message: 'No question in the request' });
   }
 
-  
+  // fix TypeError: chatMessage._getType is not a function
+  // solution found here https://github.com/hwchase17/langchainjs/issues/1573#issuecomment-1582636486
+  let chatHistory: BaseChatMessage[] = [];
+  history?.forEach((_, idx) => {
+    chatHistory.push(new HumanChatMessage(history[idx][0]));
+    chatHistory.push(new AIChatMessage(history[idx][1]));
+  });
+    
   try {
     /* Load in the file we want to do question answering over */
     // const loader = new PDFLoader('public/lotr-world-wars.pdf');
@@ -68,7 +76,7 @@ export default async function handler(
     const sanitizedQuestion = question.trim().replaceAll('\n', ' ');
     const response = await chain.call({
       question: sanitizedQuestion,
-      chat_history: history || [],
+      chat_history: chatHistory || [],
     });
 
     res.status(200).json({ ...response, vectorStore: HNSWStore });
