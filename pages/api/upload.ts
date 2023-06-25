@@ -6,6 +6,7 @@ import { langchainPrismaUpload } from '@/utils/langchain';
 import { pinecone } from '@/utils/pinecone';
 import { getErrorMessage } from '@/utils/misc';
 import { checkExistingFileInDB } from '@/utils/prisma';
+import { checkExistingFileInDB as check } from '@/utils/drizzle';
 
 export const config = {
   api: {
@@ -62,6 +63,7 @@ export default async function handler(
 
   try {
     const fileExistsInDB = await checkExistingFileInDB(fileName);
+    const drizzleFileExistsInDB = await check(fileName);
 
     if (!fileExistsInDB) {
       try {
