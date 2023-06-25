@@ -15,10 +15,10 @@ model LangChainDocs {
   createdAt DateTime @default(now())
   name      String
   nameSpace String
-  docs      Doc[]
+  docs      Docs[]
 }
 
-model Doc {
+model Docs {
   id              String        @id @default(uuid())
   createdAt       DateTime      @default(now())
   metadata        String // json string
