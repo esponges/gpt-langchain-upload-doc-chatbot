@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Form } from 'multiparty';
-import { PrismaClient } from '@prisma/client';
 
 import { langchainPrismaUpload } from '@/utils/langchain';
 import { pinecone } from '@/utils/pinecone';
@@ -12,8 +11,6 @@ export const config = {
     bodyParser: false,
   },
 };
-
-const prisma = new PrismaClient();
 
 interface FData {
   file: {
