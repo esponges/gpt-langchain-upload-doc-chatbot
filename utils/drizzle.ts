@@ -19,27 +19,8 @@ connect();
 
 export const drizzleDb = drizzle(client, { schema });
 
-// Prisma Schema
-
-// model LangChainDocs {
-//   id        String   @id @default(uuid())
-//   createdAt DateTime @default(now())
-//   name      String
-//   nameSpace String
-//   docs      Doc[]
-// }
-
-// model Doc {
-//   id              String        @id @default(uuid())
-//   createdAt       DateTime      @default(now())
-//   metadata        String // json string
-//   pageContent     String
-//   name            String
-//   docs            LangChainDocs @relation(fields: [langChainDocsId], references: [id])
-//   langChainDocsId String
-// }
-
-export const checkExistingFileInDB = async (fileName: string) => {
+// todo: add assertion for existing docs - return bool or docs
+export const getExistingDocs = async (fileName: string) => {
   const file = await drizzleDb.query.docs.findMany({
     where: eq(schema.docs.name, fileName),
   });

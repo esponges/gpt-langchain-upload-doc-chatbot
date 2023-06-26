@@ -4,8 +4,8 @@ import { getErrorMessage } from '@/utils/misc';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { HNSWLib } from 'langchain/vectorstores/hnswlib';
 import { Document } from 'langchain/document';
-import { getDocumentsFromDB } from '@/utils/prisma';
 import { AIChatMessage, BaseChatMessage, HumanChatMessage } from 'langchain/schema';
+import { getExistingDocs } from '@/utils/drizzle';
 
 
 interface ReqBody {
@@ -46,15 +46,16 @@ export default async function handler(
   });
     
   try {
-    const sqlDocs = await getDocumentsFromDB(nameSpace);
-    const documents: Document<Record<string, any>>[] | null = sqlDocs?.docs.map((doc) => {
-      const { metadata, pageContent } = doc;
-      const document = new Document({
-        pageContent,
-        metadata: JSON.parse(metadata),
-      });
-      return document;
-    }) ?? null;
+    const sqlDocs = await getExistingDocs(nameSpace);
+
+    if (!sqlDocs.length) {
+      return res.status(400).json({ message: 'No documents found in the DB' });
+    }
+
+    const documents = sqlDocs.map((doc) => new Document({
+      metadata:  JSON.parse(doc.metadata as string),
+      pageContent: doc.pageContent as string,
+    }));
 
     if (!documents) {
       return res.status(400).json({ message: 'No documents found in the DB' });
