@@ -66,7 +66,7 @@ export default async function handler(
     if (!fileExistsInDB) {
       try {
         // todo: create with Drizzle instead of prisma
-        // await langchainPrismaUpload(formData.file.path, pinecone, fileName);
+        await langchainPrismaUpload(formData.file.path, pinecone, fileName);
       } catch (error) {
         const errMsg = getErrorMessage(error);
         res.status(500).json({ error: errMsg });

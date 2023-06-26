@@ -9,7 +9,6 @@ import { Document } from 'langchain/document';
 
 import { PineconeClient } from '@pinecone-database/pinecone';
 import { getPineconeIndex } from './pinecone';
-import { prisma } from './prisma';
 
 const DOCS_MAX_LENGTH = 150;
 
@@ -124,19 +123,19 @@ export const langchainPrismaUpload = async (
   // this outputs an array of Document objects
   const docs = await textSplitter.splitDocuments(pdf);
 
-  await prisma.langChainDocs.create({
-    data: {
-      name: fileName,
-      nameSpace: fileName,
-      docs: {
-        create: docs.map((doc) => ({
-          name: fileName,
-          metadata: JSON.stringify(doc.metadata),
-          pageContent: doc.pageContent,
-        })),
-      },
-    },
-  });
+  // await prisma.langChainDocs.create({
+  //   data: {
+  //     name: fileName,
+  //     nameSpace: fileName,
+  //     docs: {
+  //       create: docs.map((doc) => ({
+  //         name: fileName,
+  //         metadata: JSON.stringify(doc.metadata),
+  //         pageContent: doc.pageContent,
+  //       })),
+  //     },
+  //   },
+  // });
 };
 
 /*
