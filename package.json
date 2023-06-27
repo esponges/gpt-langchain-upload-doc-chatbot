@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "debug:vercel-fn-size-build": "NEXT_DEBUG_FUNCTION_SIZE=1 vercel build",
     "start": "next start",
     "type-check": "tsc --noEmit",
     "lint": "eslint --ignore-path .gitignore \"**/*.+(ts|js|tsx)\"",
@@ -15,7 +16,8 @@
     "ingest": "tsx -r dotenv/config scripts/ingest-data.ts",
     "start-api-playground": "tsx -r dotenv/config scripts/api-playground.ts",
     "start-chain": "tsx -r dotenv/config scripts/chain.ts",
-    "start-upsert-vector-and-query": "tsx -r dotenv/config scripts/upsert-vector-and-query.ts"
+    "start-upsert-vector-and-query": "tsx -r dotenv/config scripts/upsert-vector-and-query.ts",
+    "analyze": "next build && next bundle-analyzer --port=8888"
   },
   "dependencies": {
     "@microsoft/fetch-event-source": "^2.0.1",
@@ -42,6 +44,7 @@
     "tailwind-merge": "^1.10.0"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^13.4.7",
     "@prisma/client": "^4.16.0",
     "@types/multiparty": "^0.0.33",
     "@types/node": "^18.14.6",
