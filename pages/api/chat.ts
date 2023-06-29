@@ -48,11 +48,11 @@ export default async function handler(
   try {
     const sqlDocs = await getExistingDocs(nameSpace);
 
-    if (!sqlDocs.length) {
+    if (!sqlDocs[0].docs.length) {
       return res.status(400).json({ message: 'No documents found in the DB' });
     }
 
-    const documents = sqlDocs.map((doc) => new Document({
+    const documents = sqlDocs[0].docs.map((doc) => new Document({
       metadata:  JSON.parse(doc.metadata as string),
       pageContent: doc.pageContent as string,
     }));
