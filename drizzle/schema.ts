@@ -41,4 +41,10 @@ export const docs = pgTable('Docs', {
     langChainDocsId: text('langChainDocsId'),
 });
 
+export const docsRelations = relations(docs, ({ one }) => ({
+    langChainDocs: one(langChainDocs, {
+      fields: [docs.langChainDocsId],
+      references: [langChainDocs.id],
+    }),
+  }));
 
