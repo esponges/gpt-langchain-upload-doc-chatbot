@@ -9,17 +9,22 @@ import { Document } from 'langchain/document';
 
 import { PineconeClient } from '@pinecone-database/pinecone';
 
-import { getPineconeIndex } from './pinecone';
-import { prisma } from './prisma';
+import { getPineconeIndex } from '@/utils/pinecone';
+import { prisma } from '@/utils/prisma';
+import { drizzleDb } from '@/utils/drizzle';
+import { langChainDocs, docs } from '@/drizzle/schema';
+import { uuid } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
+import { randomUUID } from 'crypto';
 
 const DOCS_MAX_LENGTH = 150;
 
-/* 
-  * When parsing with pdfjsLib, the metadata.pdf.metadata object is sometimes empty.
-  * this empty object causes an error when trying to ingest the data into pinecone.
-  * This function checks whether the metadata.pdf.metadata object is empty and if so, 
-  * adds some dummy data to it.
-*/
+/*
+ * When parsing with pdfjsLib, the metadata.pdf.metadata object is sometimes empty.
+ * this empty object causes an error when trying to ingest the data into pinecone.
+ * This function checks whether the metadata.pdf.metadata object is empty and if so,
+ * adds some dummy data to it.
+ */
 const verifyDocumentPdfMetadata = (docs: Document[]): Document[] => {
   const verifiedDocs: Document[] = [];
 
@@ -53,31 +58,16 @@ const verifyDocumentPdfMetadata = (docs: Document[]): Document[] => {
   return verifiedDocs;
 };
 
-
 export const langchainPineconeUpsert = async (
   filePath: string,
   pineconeClient: PineconeClient,
   fileName: string,
 ) => {
-  // use pdfjs to load pdf
-  // https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
-  const loader = new PDFLoader(filePath, {
-    // pdfjs: () => import('pdfjs-dist/legacy/build/pdf.js'),
-  });
-
-  const pdf = await loader.load();
+  const docs = await getPdfText(filePath);
+  const verifiedDocs = verifyDocumentPdfMetadata(docs);
 
   // list collections - we'll use the first one which is the default for this example
   const pineconeIndex = await getPineconeIndex(pineconeClient);
-
-  // split into chunks
-  const textSplitter = new RecursiveCharacterTextSplitter({
-    chunkSize: 1000,
-    chunkOverlap: 200,
-  });
-
-  const docs = await textSplitter.splitDocuments(pdf);
-  const verifiedDocs = verifyDocumentPdfMetadata(docs);
 
   console.log(docs);
   // todo: add threshold for big documents
@@ -93,18 +83,22 @@ export const langchainPineconeUpsert = async (
   });
 };
 
-export const langchainPrismaUpload = async (
+export const langchainUploadDocs = async (
   filePath: string,
   fileName: string,
 ) => {
   const docs = await getPdfText(filePath);
 
+  await drizzleInsertDocs(docs, fileName);
+};
+
+const prismaInsertDocs = async (docsToUpload: Document[], fileName: string) => {
   await prisma.langChainDocs.create({
     data: {
       name: fileName,
       nameSpace: fileName,
       docs: {
-        create: docs.map((doc) => ({
+        create: docsToUpload.map((doc) => ({
           name: fileName,
           metadata: JSON.stringify(doc.metadata),
           pageContent: doc.pageContent,
@@ -114,7 +108,32 @@ export const langchainPrismaUpload = async (
   });
 };
 
-const getPdfText = async (filePath: string): Promise<Document<Record<string, any>>[]>=> {
+const drizzleInsertDocs = async (docsToUpload: Document[], fileName: string) => {
+  await drizzleDb.transaction(async () => {
+    const newDocId = randomUUID();
+
+    await drizzleDb.insert(langChainDocs).values({
+      id: newDocId,
+      name: fileName,
+      nameSpace: fileName,
+    }).returning();
+
+
+    await drizzleDb.insert(docs).values(
+      docsToUpload.map((doc) => ({
+        id: randomUUID(),
+        name: fileName,
+        metadata: JSON.stringify(doc.metadata),
+        pageContent: doc.pageContent,
+        langChainDocsId: newDocId,
+      })),
+    );
+  });
+};
+
+const getPdfText = async (
+  filePath: string,
+): Promise<Document<Record<string, any>>[]> => {
   // use pdfjs to load pdf
   // https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
   const loader = new PDFLoader(filePath, {
@@ -166,4 +185,3 @@ const getPdfText = async (filePath: string): Promise<Document<Record<string, any
 
 //   return text;
 // };
-

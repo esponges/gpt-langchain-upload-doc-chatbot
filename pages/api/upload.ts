@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { Form } from 'multiparty';
 
-import { langchainPrismaUpload } from '@/utils/langchain';
+import { langchainUploadDocs } from '@/utils/langchain';
 import { pinecone } from '@/utils/pinecone';
 import { getErrorMessage } from '@/utils/misc';
 import { getExistingDocs } from '@/utils/drizzle';
@@ -64,7 +64,7 @@ export default async function handler(
     if (!fileExistsInDB) {
       try {
         // todo: create with Drizzle instead of prisma
-        await langchainPrismaUpload(formData.file.path, fileName);
+        await langchainUploadDocs(formData.file.path, fileName);
       } catch (error) {
         const errMsg = getErrorMessage(error);
         res.status(500).json({ error: errMsg });
