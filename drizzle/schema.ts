@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { pgTable, serial, text } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, varchar } from 'drizzle-orm/pg-core';
 
 // model LangChainDocs {
 //   id        String   @id @default(uuid())
@@ -20,7 +20,7 @@ import { pgTable, serial, text } from 'drizzle-orm/pg-core';
 // }
 
 export const langChainDocs = pgTable('LangChainDocs', {
-  id: serial('id').primaryKey(),
+  id: varchar('id').primaryKey(),
   createdAt: text('createdAt'),
   name: text('name'),
   nameSpace: text('nameSpace'),
@@ -31,7 +31,7 @@ export const langChainDocRelations = relations(langChainDocs, ({ many }) => ({
 }));
 
 export const docs = pgTable('Docs', {
-  id: serial('id').primaryKey(),
+  id: varchar('id').primaryKey(),
   createdAt: text('createdAt'),
   metadata: text('metadata'),
   pageContent: text('pageContent'),
