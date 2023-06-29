@@ -58,7 +58,8 @@ export default async function handler(
   const fileName = formData.file.originalFilename;
 
   try {
-    const fileExistsInDB = await getExistingDocs(fileName);
+    const DBDocs = await getExistingDocs(fileName);
+    const fileExistsInDB = DBDocs.length > 0;
 
     if (!fileExistsInDB) {
       try {
