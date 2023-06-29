@@ -97,6 +97,24 @@ export const langchainPrismaUpload = async (
   filePath: string,
   fileName: string,
 ) => {
+  const docs = await getPdfText(filePath);
+
+  await prisma.langChainDocs.create({
+    data: {
+      name: fileName,
+      nameSpace: fileName,
+      docs: {
+        create: docs.map((doc) => ({
+          name: fileName,
+          metadata: JSON.stringify(doc.metadata),
+          pageContent: doc.pageContent,
+        })),
+      },
+    },
+  });
+};
+
+const getPdfText = async (filePath: string): Promise<Document<Record<string, any>>[]>=> {
   // use pdfjs to load pdf
   // https://js.langchain.com/docs/modules/indexes/document_loaders/examples/file_loaders/pdf
   const loader = new PDFLoader(filePath, {
@@ -114,19 +132,7 @@ export const langchainPrismaUpload = async (
   // this outputs an array of Document objects
   const docs = await textSplitter.splitDocuments(pdf);
 
-  await prisma.langChainDocs.create({
-    data: {
-      name: fileName,
-      nameSpace: fileName,
-      docs: {
-        create: docs.map((doc) => ({
-          name: fileName,
-          metadata: JSON.stringify(doc.metadata),
-          pageContent: doc.pageContent,
-        })),
-      },
-    },
-  });
+  return docs;
 };
 
 // /*
