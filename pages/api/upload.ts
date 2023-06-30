@@ -2,7 +2,6 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { Form } from 'multiparty';
 
 import { langchainUploadDocs } from '@/utils/langchain';
-import { pinecone } from '@/utils/pinecone';
 import { getErrorMessage } from '@/utils/misc';
 import { getExistingDocs } from '@/utils/drizzle';
 
@@ -37,33 +36,35 @@ export default async function handler(
   req: ApFDataRequest,
   res: NextApiResponse,
 ) {
-  if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed' });
-    return;
-  }
+  // if (req.method !== 'POST') {
+  //   res.status(405).json({ error: 'Method not allowed' });
+  //   return;
+  // }
   
   try {
-    const form = new Form();
-    const formData = await new Promise<FData>((resolve, reject) => {
-      form.parse(req, (err, fields, files) => {
-        if (err) {
-          reject(err);
-          return;
-        }
+    // const form = new Form();
+    // const formData = await new Promise<FData>((resolve, reject) => {
+    //   form.parse(req, (err, fields, files) => {
+    //     if (err) {
+    //       reject(err);
+    //       return;
+    //     }
   
-        const file = files.file[0];
-        resolve({ file });
-      });
-    });
+    //     const file = files.file[0];
+    //     resolve({ file });
+    //   });
+    // });
   
-    const fileName = formData.file.originalFilename;
+    // const fileName = formData.file.originalFilename;
+    const fileName = 'robot copy 5.pdf';
     const DBDocs = await getExistingDocs(fileName);
     const fileExistsInDB = DBDocs.length > 0;
 
     if (!fileExistsInDB) {
       try {
         // todo: create with Drizzle instead of prisma
-        await langchainUploadDocs(formData.file.path, fileName);
+        // await langchainUploadDocs(formData.file.path, fileName);
+        await langchainUploadDocs('some-path', fileName);
       } catch (error) {
         const errMsg = getErrorMessage(error);
         res.status(500).json({ error: errMsg });
