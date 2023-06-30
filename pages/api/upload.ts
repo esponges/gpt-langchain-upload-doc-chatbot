@@ -1,15 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Form } from 'multiparty';
+// import { Form } from 'multiparty';
 
 import { langchainUploadDocs } from '@/utils/langchain';
 import { getErrorMessage } from '@/utils/misc';
 import { getExistingDocs } from '@/utils/drizzle';
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// export const config = {
+//   api: {
+//     bodyParser: false,
+//   },
+// };
 
 interface FData {
   file: {
@@ -36,10 +36,10 @@ export default async function handler(
   req: ApFDataRequest,
   res: NextApiResponse,
 ) {
-  // if (req.method !== 'POST') {
-  //   res.status(405).json({ error: 'Method not allowed' });
-  //   return;
-  // }
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
   
   try {
     // const form = new Form();
