@@ -83,13 +83,11 @@ export default function Home() {
       let fileName: string = '';
       let uploadRes;
 
-      console.log('ignoring file upload for now');
-      if (isUserFirstMessage && 1 !== 1) {
+      if (isUserFirstMessage) {
         const response = await fetch('/api/upload', {
           method: 'POST',
           body: formData,
         });
-        console.log('response', response);
         const uploadData = await response.json();
 
         console.log('uploadData', uploadData);
@@ -111,8 +109,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           question,
-          nameSpace: 'robot copy 5.pdf',
-          // nameSpace: !!nameSpace ? nameSpace : uploadRes.nameSpace,
+          nameSpace: !!nameSpace ? nameSpace : uploadRes.nameSpace,
           history,
         }),
       });
