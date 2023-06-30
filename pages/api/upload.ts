@@ -41,23 +41,22 @@ export default async function handler(
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
-
-  const form = new Form();
-  const formData = await new Promise<FData>((resolve, reject) => {
-    form.parse(req, (err, fields, files) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-
-      const file = files.file[0];
-      resolve({ file });
-    });
-  });
-
-  const fileName = formData.file.originalFilename;
-
+  
   try {
+    const form = new Form();
+    const formData = await new Promise<FData>((resolve, reject) => {
+      form.parse(req, (err, fields, files) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+  
+        const file = files.file[0];
+        resolve({ file });
+      });
+    });
+  
+    const fileName = formData.file.originalFilename;
     const DBDocs = await getExistingDocs(fileName);
     const fileExistsInDB = DBDocs.length > 0;
 
