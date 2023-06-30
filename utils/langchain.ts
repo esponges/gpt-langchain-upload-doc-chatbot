@@ -10,7 +10,7 @@ import { Document } from 'langchain/document';
 import { PineconeClient } from '@pinecone-database/pinecone';
 
 import { getPineconeIndex } from '@/utils/pinecone';
-import { prisma } from '@/utils/prisma';
+// import { prisma } from '@/utils/prisma';
 import { drizzleDb } from '@/utils/drizzle';
 import { langChainDocs, docs } from '@/drizzle/schema';
 import { uuid } from 'drizzle-orm/pg-core';
@@ -92,21 +92,21 @@ export const langchainUploadDocs = async (
   await drizzleInsertDocs(docs, fileName);
 };
 
-const prismaInsertDocs = async (docsToUpload: Document[], fileName: string) => {
-  await prisma.langChainDocs.create({
-    data: {
-      name: fileName,
-      nameSpace: fileName,
-      docs: {
-        create: docsToUpload.map((doc) => ({
-          name: fileName,
-          metadata: JSON.stringify(doc.metadata),
-          pageContent: doc.pageContent,
-        })),
-      },
-    },
-  });
-};
+// const prismaInsertDocs = async (docsToUpload: Document[], fileName: string) => {
+//   await prisma.langChainDocs.create({
+//     data: {
+//       name: fileName,
+//       nameSpace: fileName,
+//       docs: {
+//         create: docsToUpload.map((doc) => ({
+//           name: fileName,
+//           metadata: JSON.stringify(doc.metadata),
+//           pageContent: doc.pageContent,
+//         })),
+//       },
+//     },
+//   });
+// };
 
 const drizzleInsertDocs = async (docsToUpload: Document[], fileName: string) => {
   await drizzleDb.transaction(async () => {

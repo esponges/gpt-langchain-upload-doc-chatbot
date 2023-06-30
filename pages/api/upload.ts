@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 // import { Form } from 'multiparty';
 
-// import { langchainUploadDocs } from '@/utils/langchain';
+import { langchainUploadDocs } from '@/utils/langchain';
 import { getErrorMessage } from '@/utils/misc';
 import { getExistingDocs } from '@/utils/drizzle';
 
@@ -61,17 +61,17 @@ export default async function handler(
     const DBDocs = await getExistingDocs(fileName);
     const fileExistsInDB = DBDocs.length > 0;
 
-    // if (!fileExistsInDB) {
-    //   try {
-    //     // todo: create with Drizzle instead of prisma
-    //     // await langchainUploadDocs(formData.file.path, fileName);
-    //     await langchainUploadDocs('some-path', fileName);
-    //   } catch (error) {
-    //     const errMsg = getErrorMessage(error);
-    //     res.status(500).json({ error: errMsg });
-    //     return;
-    //   }
-    // }
+    if (!fileExistsInDB) {
+      try {
+        // todo: create with Drizzle instead of prisma
+        // await langchainUploadDocs(formData.file.path, fileName);
+        await langchainUploadDocs('some-path', fileName);
+      } catch (error) {
+        const errMsg = getErrorMessage(error);
+        res.status(500).json({ error: errMsg });
+        return;
+      }
+    }
 
     const resData: UploadResponse = {
       fileExistsInDB: !!fileExistsInDB,
