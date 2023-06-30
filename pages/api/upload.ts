@@ -1,15 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { Form } from 'multiparty';
+// import { Form } from 'multiparty';
 
-import { langchainUploadDocs } from '@/utils/langchain';
-import { getErrorMessage } from '@/utils/misc';
-import { getExistingDocs } from '@/utils/drizzle';
+// import { langchainUploadDocs } from '@/utils/langchain';
+// import { getErrorMessage } from '@/utils/misc';
+// import { getExistingDocs } from '@/utils/drizzle';
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// export const config = {
+//   api: {
+//     bodyParser: false,
+//   },
+// };
 
 interface FData {
   file: {
@@ -36,50 +36,51 @@ export default async function handler(
   req: ApFDataRequest,
   res: NextApiResponse,
 ) {
-  if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed' });
-    return;
-  }
-  const form = new Form();
-  const formData = await new Promise<FData>((resolve, reject) => {
-    form.parse(req, (err, fields, files) => {
-      if (err) {
-        reject(err);
-        return;
-      }
+  res.status(200).json({ message: 'ok' });
+  // if (req.method !== 'POST') {
+  //   res.status(405).json({ error: 'Method not allowed' });
+  //   return;
+  // }
+  // const form = new Form();
+  // const formData = await new Promise<FData>((resolve, reject) => {
+  //   form.parse(req, (err, fields, files) => {
+  //     if (err) {
+  //       reject(err);
+  //       return;
+  //     }
 
-      const file = files.file[0];
-      resolve({ file });
-    });
-  });
+  //     const file = files.file[0];
+  //     resolve({ file });
+  //   });
+  // });
 
-  const fileName = formData.file.originalFilename;
+  // const fileName = formData.file.originalFilename;
   
-  try {
-    const DBDocs = await getExistingDocs(fileName);
-    const fileExistsInDB = DBDocs.length > 0;
+  // try {
+  //   const DBDocs = await getExistingDocs(fileName);
+  //   const fileExistsInDB = DBDocs.length > 0;
 
-    if (!fileExistsInDB) {
-      try {
-        // todo: create with Drizzle instead of prisma
-        // await langchainUploadDocs(formData.file.path, fileName);
-        await langchainUploadDocs('some-path', fileName);
-      } catch (error) {
-        const errMsg = getErrorMessage(error);
-        res.status(500).json({ error: errMsg });
-        return;
-      }
-    }
+  //   if (!fileExistsInDB) {
+  //     try {
+  //       // todo: create with Drizzle instead of prisma
+  //       // await langchainUploadDocs(formData.file.path, fileName);
+  //       await langchainUploadDocs('some-path', fileName);
+  //     } catch (error) {
+  //       const errMsg = getErrorMessage(error);
+  //       res.status(500).json({ error: errMsg });
+  //       return;
+  //     }
+  //   }
 
-    const resData: UploadResponse = {
-      fileExistsInDB: !!fileExistsInDB,
-      nameSpace: fileName,
-    };
+  //   const resData: UploadResponse = {
+  //     fileExistsInDB: !!fileExistsInDB,
+  //     nameSpace: fileName,
+  //   };
 
-    res.status(200).json(resData);
-  } catch (error) {
-    const errMsg = getErrorMessage(error);
-    res.status(500).json({ error: errMsg });
-    return;
-  }
+  //   res.status(200).json(resData);
+  // } catch (error) {
+  //   const errMsg = getErrorMessage(error);
+  //   res.status(500).json({ error: errMsg });
+  //   return;
+  // }
 }
