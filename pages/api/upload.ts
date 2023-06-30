@@ -36,7 +36,6 @@ export default async function handler(
   req: ApFDataRequest,
   res: NextApiResponse,
 ) {
-  // res.status(200).json({ message: 'ok' });
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
@@ -55,7 +54,7 @@ export default async function handler(
   });
 
   const fileName = formData.file.originalFilename;
-  // const fileName = 'robot copy 5.pdf';
+  const filePath = formData.file.path;
   
   try {
     const DBDocs = await getExistingDocs(fileName);
@@ -63,9 +62,7 @@ export default async function handler(
 
     if (!fileExistsInDB) {
       try {
-        // todo: create with Drizzle instead of prisma
-        // await langchainUploadDocs(formData.file.path, fileName);
-        await langchainUploadDocs('some-path', fileName);
+        await langchainUploadDocs(filePath, fileName);
       } catch (error) {
         const errMsg = getErrorMessage(error);
         res.status(500).json({ error: errMsg });
