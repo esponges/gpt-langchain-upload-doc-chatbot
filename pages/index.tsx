@@ -83,7 +83,8 @@ export default function Home() {
       let fileName: string = '';
       let uploadRes;
 
-      if (isUserFirstMessage) {
+      console.log('ignoring file upload for now');
+      if (isUserFirstMessage && 1 !== 1) {
         const response = await fetch('/api/upload', {
           method: 'POST',
           body: formData,
@@ -98,6 +99,7 @@ export default function Home() {
         }
 
         setNameSpace(uploadData.nameSpace);
+        // not needed anymore
         fileName = uploadData.nameSpace as string;
         uploadRes = uploadData;
       }
@@ -109,7 +111,8 @@ export default function Home() {
         },
         body: JSON.stringify({
           question,
-          nameSpace: !!nameSpace ? nameSpace : uploadRes.nameSpace,
+          nameSpace: 'robot copy 5.pdf',
+          // nameSpace: !!nameSpace ? nameSpace : uploadRes.nameSpace,
           history,
         }),
       });
