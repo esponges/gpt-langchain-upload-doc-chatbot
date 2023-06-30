@@ -88,6 +88,7 @@ export default function Home() {
           method: 'POST',
           body: formData,
         });
+        console.log('response', response);
         const uploadData = await response.json();
 
         console.log('uploadData', uploadData);
