@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { pgTable, serial, text, varchar } from 'drizzle-orm/pg-core';
+import { pgTable, text, varchar } from 'drizzle-orm/pg-core';
 
 // model LangChainDocs {
 //   id        String   @id @default(uuid())

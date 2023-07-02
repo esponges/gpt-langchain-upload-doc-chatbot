@@ -13,8 +13,6 @@ import { getPineconeIndex } from '@/utils/pinecone';
 // import { prisma } from '@/utils/prisma';
 import { drizzleDb } from '@/utils/drizzle';
 import { langChainDocs, docs } from '@/drizzle/schema';
-import { uuid } from 'drizzle-orm/pg-core';
-import { sql } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
 
 const DOCS_MAX_LENGTH = 150;
@@ -117,7 +115,6 @@ const drizzleInsertDocs = async (docsToUpload: Document[], fileName: string) => 
       name: fileName,
       nameSpace: fileName,
     }).returning();
-
 
     await drizzleDb.insert(docs).values(
       docsToUpload.map((doc) => ({

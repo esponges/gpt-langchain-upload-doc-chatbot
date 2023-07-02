@@ -37,7 +37,7 @@ export default async function handler(
 
   // fix TypeError: chatMessage._getType is not a function
   // solution found here https://github.com/hwchase17/langchainjs/issues/1573#issuecomment-1582636486
-  let chatHistory: BaseChatMessage[] = [];
+  const chatHistory: BaseChatMessage[] = [];
   history?.forEach((_, idx) => {
     // first message is always human message
     chatHistory.push(new HumanChatMessage(history[idx][0]));
