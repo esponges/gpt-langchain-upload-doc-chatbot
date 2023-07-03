@@ -333,7 +333,7 @@ export default function Home() {
               </div>
             </div>
             {error || !uploadedFile ? (
-              <div className="border border-red-400 rounded-md p-4">
+              <div className={`border rounded-md p-4 ${error ? 'border-red-500' : 'border-gray-500'}`}>
                 <p className={error ? 'text-red-500' : 'text-gray-500'}>
                   {error ? `Please try again later or use a different file. Error: ${error} ` : 'Please upload your file first to proceed'}
                 </p>
