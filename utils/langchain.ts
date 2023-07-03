@@ -148,6 +148,10 @@ const getPdfText = async (
   // this outputs an array of Document objects
   const docs = await textSplitter.splitDocuments(pdf);
 
+  if (process.env.MAX_DOC_LENGTH && docs.length > parseInt(process.env.MAX_DOC_LENGTH)) {
+    throw new Error('Please upload a smaller document');
+  }
+
   return docs;
 };
 

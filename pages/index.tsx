@@ -131,7 +131,6 @@ export default function Home() {
           history: [...state.history, [question, chatData.text]],
         }));
       }
-      console.log('messageState', messageState);
 
       setLoading(false);
 
@@ -335,8 +334,8 @@ export default function Home() {
             </div>
             {error || !uploadedFile ? (
               <div className="border border-red-400 rounded-md p-4">
-                <p className="text-red-500">
-                  {error ? `${error} - Please try again later or use a different file` : 'Please upload your file first to proceed'}
+                <p className={error ? 'text-red-500' : 'text-gray-500'}>
+                  {error ? `Please try again later or use a different file. Error: ${error} ` : 'Please upload your file first to proceed'}
                 </p>
               </div>
             ) : null}
