@@ -154,14 +154,48 @@ export default function Home() {
     }
   };
 
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setUploadedFile(e.target.files[0]);
-    }
-  };
-
   const handleModalClose = () => {
     setModalInfo(null);
+  };
+
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    // if file limit is set check if file exceeds limit
+    if (process.env.NEXT_PUBLIC_MAX_DOC_SIZE && e.target.files) {
+      const fileSize = e.target.files[0].size;
+      const maxFileSize = parseInt(process.env.NEXT_PUBLIC_MAX_DOC_SIZE);
+      if (fileSize > maxFileSize) {
+        setModalInfo({
+          title: 'File size limit exceeded',
+          onClose: handleModalClose,
+          isOpen: true,
+          children: (
+            <div>
+              <p className="mb-4 text-red-400">
+                The file you are trying to upload is too big. The maximum file
+                size is {maxFileSize / 1000000}MB.
+              </p>
+              <p className="mt-4 text-xs">
+                Please try again with a smaller file or{' '}
+                <a
+                  href="mailto:
+                "
+                  className="underline"
+                >
+                  contact us
+                </a>{' '}
+                if you need to upload a larger file.
+              </p>
+            </div>
+          ),
+          showActions: false,
+          outerCloseBtn: false,
+        });
+        return;
+      }
+
+    } else if (e.target.files && e.target.files.length > 0) {
+      setUploadedFile(e.target.files[0]);
+    }
   };
 
   const canUploadAttachment = !loading && !uploadedFile;
@@ -223,22 +257,6 @@ export default function Home() {
                   {uploadedFile.name} uploaded
                 </p>
               ) : null}
-              {/* add button for toggling test modal */}
-              <button
-                className="text-sm font-medium text-white bg-blue-600 border
-                border-transparent rounded-md shadow-sm hover:bg-blue-900
-                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                onClick={() =>
-                  setModalInfo({
-                    title: 'Test Modal',
-                    children: <p>Test Modal</p>,
-                    isOpen: true,
-                    onClose: handleModalClose,
-                  })
-                }
-              >
-                Test Modal
-              </button>
             </div>
           </div>
           <main className={styles.main}>
