@@ -160,38 +160,39 @@ export default function Home() {
 
   const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     // if file limit is set check if file exceeds limit
-    if (process.env.NEXT_PUBLIC_MAX_DOC_SIZE && e.target.files) {
-      const fileSize = e.target.files[0].size;
-      const maxFileSize = parseInt(process.env.NEXT_PUBLIC_MAX_DOC_SIZE);
-      if (fileSize > maxFileSize) {
-        setModalInfo({
-          title: 'File size limit exceeded',
-          onClose: handleModalClose,
-          isOpen: true,
-          children: (
-            <div>
-              <p className="mb-4 text-red-400">
-                The file you are trying to upload is too big. The maximum file
-                size is {maxFileSize / 1000000}MB.
-              </p>
-              <p className="mt-4 text-xs">
-                Please try again with a smaller file or{' '}
-                <a
-                  href="mailto:
+    const fileSize = e.target.files?.[0]?.size;
+    const maxFileSize = process.env.NEXT_PUBLIC_MAX_DOC_SIZE
+      ? parseInt(process.env.NEXT_PUBLIC_MAX_DOC_SIZE)
+      : 0;
+      
+    if (!!maxFileSize && !!fileSize && fileSize > maxFileSize) {
+      setModalInfo({
+        title: 'File size limit exceeded',
+        onClose: handleModalClose,
+        isOpen: true,
+        children: (
+          <div>
+            <p className="mb-4 text-red-400">
+              The file you are trying to upload is too big. The maximum file
+              size is {maxFileSize / 1000000}MB.
+            </p>
+            <p className="mt-4 text-xs">
+              Please try again with a smaller file or{' '}
+              <a
+                href="mailto:
                 "
-                  className="underline"
-                >
-                  contact us
-                </a>{' '}
-                if you need to upload a larger file.
-              </p>
-            </div>
-          ),
-          showActions: false,
-          outerCloseBtn: false,
-        });
-        return;
-      }
+                className="underline"
+              >
+                contact us
+              </a>{' '}
+              if you need to upload a larger file.
+            </p>
+          </div>
+        ),
+        showActions: false,
+        outerCloseBtn: false,
+      });
+      return;
 
     } else if (e.target.files && e.target.files.length > 0) {
       setUploadedFile(e.target.files[0]);
