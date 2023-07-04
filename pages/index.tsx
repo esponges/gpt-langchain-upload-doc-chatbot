@@ -13,6 +13,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { getErrorMessage } from '@/utils/misc';
+import { Modal, type Props as ModalProps } from '@/components/ui/modal';
 
 export default function Home() {
   const [query, setQuery] = useState<string>('');
@@ -34,6 +35,7 @@ export default function Home() {
   });
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [nameSpace, setNameSpace] = useState<string>();
+  const [modalInfo, setModalInfo] = useState<ModalProps | null>(null);
 
   const { messages, history } = messageState;
 
@@ -158,13 +160,27 @@ export default function Home() {
     }
   };
 
+  const handleModalClose = () => {
+    setModalInfo(null);
+  };
+
   const canUploadAttachment = !loading && !uploadedFile;
 
   return (
     <>
+      <Modal
+        isOpen={!!modalInfo}
+        onClose={handleModalClose}
+        title={modalInfo?.title}
+        showActions={modalInfo?.showActions}
+        bgColor={modalInfo?.bgColor}
+        outerCloseBtn={modalInfo?.outerCloseBtn}
+      >
+        {modalInfo?.children}
+      </Modal>
       <Layout>
         <div className="mx-auto flex flex-col gap-4">
-          <div className='w-[75vw]'>
+          <div className="w-[75vw]">
             <h1 className="text-3xl my-6 font-bold leading-[1.1] tracking-tighter text-center">
               {uploadedFile && uploadedFile.name ? (
                 <span className="text-blue-600">
@@ -180,7 +196,7 @@ export default function Home() {
                 type="file"
                 name="file"
                 id="file"
-                accept='application/pdf'
+                accept="application/pdf"
                 className="hidden"
                 onChange={handleFileUpload}
                 disabled={!canUploadAttachment}
@@ -189,9 +205,15 @@ export default function Home() {
                 htmlFor="file"
                 className={`
                 flex items-center justify-center 
-                w-1/4 px-4 py-2 ${!canUploadAttachment ? 'cursor-not-allowed' : 'cursor-pointer'}
+                w-1/4 px-4 py-2 ${
+                  !canUploadAttachment ? 'cursor-not-allowed' : 'cursor-pointer'
+                }
                 text-sm font-medium text-white bg-blue-600 border 
-                border-transparent rounded-md shadow-sm ${!canUploadAttachment ? 'hover:bg-gray-600' : 'hover:bg-blue-900'}
+                border-transparent rounded-md shadow-sm ${
+                  !canUploadAttachment
+                    ? 'hover:bg-gray-600'
+                    : 'hover:bg-blue-900'
+                }
                 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
               >
                 Upload a document
@@ -201,6 +223,22 @@ export default function Home() {
                   {uploadedFile.name} uploaded
                 </p>
               ) : null}
+              {/* add button for toggling test modal */}
+              <button
+                className="text-sm font-medium text-white bg-blue-600 border
+                border-transparent rounded-md shadow-sm hover:bg-blue-900
+                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                onClick={() =>
+                  setModalInfo({
+                    title: 'Test Modal',
+                    children: <p>Test Modal</p>,
+                    isOpen: true,
+                    onClose: handleModalClose,
+                  })
+                }
+              >
+                Test Modal
+              </button>
             </div>
           </div>
           <main className={styles.main}>
@@ -333,9 +371,15 @@ export default function Home() {
               </div>
             </div>
             {error || !uploadedFile ? (
-              <div className={`border rounded-md p-4 ${error ? 'border-red-500' : 'border-gray-500'}`}>
+              <div
+                className={`border rounded-md p-4 ${
+                  error ? 'border-red-500' : 'border-gray-500'
+                }`}
+              >
                 <p className={error ? 'text-red-500' : 'text-gray-500'}>
-                  {error ? `Please try again later or use a different file. Error: ${error} ` : 'Please upload your file first to proceed'}
+                  {error
+                    ? `Please try again later or use a different file. Error: ${error} `
+                    : 'Please upload your file first to proceed'}
                 </p>
               </div>
             ) : null}
@@ -347,7 +391,8 @@ export default function Home() {
           project and adapted by{' '}
           <a href="https://fer-toasted.vercel.app/" className="text-blue-500">
             esponges
-          </a> for the parse & upload to vector store feature.
+          </a>{' '}
+          for the parse & upload to vector store feature.
         </footer>
       </Layout>
     </>
