@@ -10,10 +10,8 @@ import { Document } from 'langchain/document';
 import { PineconeClient } from '@pinecone-database/pinecone';
 
 import { getPineconeIndex } from '@/utils/pinecone';
+import { drizzleDb, insertDocs as drizzleInsertDocs } from '@/utils/drizzle';
 // import { prisma } from '@/utils/prisma';
-import { drizzleDb } from '@/utils/drizzle';
-import { langChainDocs, docs } from '@/drizzle/schema';
-import { randomUUID } from 'crypto';
 
 const DOCS_MAX_LENGTH = 150;
 
@@ -105,28 +103,6 @@ export const langchainUploadDocs = async (
 //     },
 //   });
 // };
-
-const drizzleInsertDocs = async (docsToUpload: Document[], fileName: string) => {
-  await drizzleDb.transaction(async () => {
-    const newDocId = randomUUID();
-
-    await drizzleDb.insert(langChainDocs).values({
-      id: newDocId,
-      name: fileName,
-      nameSpace: fileName,
-    }).returning();
-
-    await drizzleDb.insert(docs).values(
-      docsToUpload.map((doc) => ({
-        id: randomUUID(),
-        name: fileName,
-        metadata: JSON.stringify(doc.metadata),
-        pageContent: doc.pageContent,
-        langChainDocsId: newDocId,
-      })),
-    );
-  });
-};
 
 const getPdfText = async (
   filePath: string,
