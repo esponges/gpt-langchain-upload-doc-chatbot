@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '@auth0/nextjs-auth0/client';
+import Link from 'next/link';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -30,23 +31,23 @@ export default function Layout({ children }: LayoutProps) {
           <nav className="ml-4 pl-6">
             {isLocalhost && user && !isLoading ? (
               <>
-                <a
+                <Link
                   href="/api/auth/logout"
                   className="hover:text-slate-600 cursor-pointer"
                 >
                   Log Out
-                </a>
+                </Link>
                 <span className="text-slate-600 ml-6">
                   Logged in as {user.email}
                 </span>
               </>
             ) : (
-              <a
+              <Link
                 href="/api/auth/login"
                 className="hover:text-slate-600 cursor-pointer"
               >
                 Log In
-              </a>
+              </Link>
             )}
           </nav>
         </div>
