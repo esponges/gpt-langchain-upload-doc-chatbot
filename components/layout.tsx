@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
+import { useUser } from '@auth0/nextjs-auth0/client';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -6,6 +7,8 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const [isMounted, setIsMounted] = useState(false);
+
+  const { user, error, isLoading } = useUser();
 
   // fixes hydration errors
   useEffect(() => {
@@ -16,15 +19,36 @@ export default function Layout({ children }: LayoutProps) {
     return null;
   }
 
+  // todo: must configure Auth0 with vercel
+  const isLocalhost =
+    typeof window !== 'undefined' && window.location.host.includes('localhost');
+
   return (
     <div className="mx-auto flex flex-col space-y-4">
       <header className="container sticky top-0 z-40 bg-white">
         <div className="h-16 border-b border-b-slate-200 py-4">
-{/*           <nav className="ml-4 pl-6">
-            <a href="#" className="hover:text-slate-600 cursor-pointer">
-              Home
-            </a>
-          </nav> */}
+          <nav className="ml-4 pl-6">
+            {isLocalhost && user && !isLoading ? (
+              <>
+                <a
+                  href="/api/auth/logout"
+                  className="hover:text-slate-600 cursor-pointer"
+                >
+                  Log Out
+                </a>
+                <span className="text-slate-600 ml-6">
+                  Logged in as {user.email}
+                </span>
+              </>
+            ) : (
+              <a
+                href="/api/auth/login"
+                className="hover:text-slate-600 cursor-pointer"
+              >
+                Log In
+              </a>
+            )}
+          </nav>
         </div>
       </header>
       <div>
