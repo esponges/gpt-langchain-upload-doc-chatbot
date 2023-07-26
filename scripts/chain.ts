@@ -74,12 +74,12 @@ export const runConversationWithMemoryDoc = async () => {
 };
 
 (async () => {
-  await runConversationWithMemoryDoc();
-  console.log('chain completed');
+  // await runConversationWithMemoryDoc();
+  // console.log('chain completed');
 })();
 
 /* from the docs */
-export const runConversationWithMemoryDoc2 = async () => {
+export const runConversationWithMemoryExternallyManagedMemory = async () => {
   const CUSTOM_QUESTION_GENERATOR_CHAIN_PROMPT = `Given the following conversation and a follow up question, return the conversation history excerpt that includes any relevant context to the question if it exists and rephrase the follow up question to be a standalone question.
 Chat History:
 {chat_history}
@@ -115,30 +115,37 @@ Your answer:`;
     model,
     vectorStore.asRetriever(),
     {
-      memory: new BufferMemory({
-        memoryKey: 'chat_history',
-        returnMessages: true,
-      }),
+      // memory: new BufferMemory({
+      //   memoryKey: 'chat_history',
+      //   returnMessages: true,
+      // }),
       questionGeneratorChainOptions: {
         template: CUSTOM_QUESTION_GENERATOR_CHAIN_PROMPT,
       },
     },
   );
 
-  const res = await chain.call({
-    question:
-      "I have a friend called Bob. He's 28 years old. He'd like to know what the powerhouse of the cell is?",
-  });
+  const chatHistory = `
+    I have a friend called Bob. He's 28 years old. He'd like to know what the powerhouse of the cell is?\n
+    The powerhouse of the cell is the mitochondria.\n
+  `;
 
-  console.log(res);
-  /*
-  {
-    text: "The powerhouse of the cell is the mitochondria."
-  }
-*/
+//   const res = await chain.call({
+//     question:
+//       "I have a friend called Bob. He's 28 years old. He'd like to know what the powerhouse of the cell is?",
+//   });
+
+//   console.log(res);
+//   /*
+//   {
+//     text: "The powerhouse of the cell is the mitochondria."
+//   }
+// */
+  const firstQn = "How old is Bob?"
 
   const res2 = await chain.call({
-    question: 'How old is Bob?',
+    question: firstQn,
+    chat_history: chatHistory,
   });
 
   console.log(res2); // Bob is 28 years old.
@@ -147,16 +154,21 @@ Your answer:`;
   {
     text: "Bob is 28 years old."
   }
-*/
+  */
 
-  const unrelatedRes = await chain.call({
-    question: 'What is the capital of Mexico?',
+  const updatedChatHistory = chatHistory + '\n' + firstQn + '\n' + res2.text + '\n';
+
+  const secondQn = "Whats my friends name?"
+
+  const res3 = await chain.call({
+    question: secondQn,
+    chat_history: updatedChatHistory,
   });
 
-  console.log(unrelatedRes); // I don't know or similar
+  console.log(res3); // Bob
 };
 
 (async () => {
-  await runConversationWithMemoryDoc2();
+  await runConversationWithMemoryExternallyManagedMemory();
   console.log('chain completed');
 })();
