@@ -15,6 +15,7 @@
     "format": "prettier --ignore-path .gitignore \"**/*.+(ts|js|tsx)\" --write",
     "ingest": "tsx -r dotenv/config scripts/ingest-data.ts",
     "start-api-playground": "tsx -r dotenv/config scripts/api-playground.ts",
+    "chain2": "tsx -r dotenv/config scripts/chain-2.ts",
     "start-chain": "tsx -r dotenv/config scripts/chain.ts",
     "start-upsert-vector-and-query": "tsx -r dotenv/config scripts/upsert-vector-and-query.ts",
     "analyze": "next build && next bundle-analyzer --port=8888"
