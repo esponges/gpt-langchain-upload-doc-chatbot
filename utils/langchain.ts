@@ -3,14 +3,14 @@
 
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { PDFLoader } from 'langchain/document_loaders/fs/pdf';
-import { PineconeStore } from 'langchain/vectorstores/pinecone';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { Document } from 'langchain/document';
 
-import { PineconeClient } from '@pinecone-database/pinecone';
+import { Pinecone } from '@pinecone-database/pinecone';
 
 import { getPineconeIndex } from '@/utils/pinecone';
-import { drizzleDb, insertDocs as drizzleInsertDocs } from '@/utils/drizzle';
+import { insertDocs as drizzleInsertDocs } from '@/utils/drizzle';
+import { PineconeStore } from '@langchain/pinecone';
 // import { prisma } from '@/utils/prisma';
 
 const DOCS_MAX_LENGTH = 150;
@@ -56,7 +56,7 @@ const verifyDocumentPdfMetadata = (docs: Document[]): Document[] => {
 
 export const langchainPineconeUpsert = async (
   filePath: string,
-  pineconeClient: PineconeClient,
+  pineconeClient: Pinecone,
   fileName: string,
 ) => {
   const docs = await getPdfText(filePath);
@@ -74,8 +74,8 @@ export const langchainPineconeUpsert = async (
   // add documents to index
   await PineconeStore.fromDocuments(verifiedDocs, new OpenAIEmbeddings(), {
     pineconeIndex,
-    namespace: fileName,
-    textKey: 'text',
+    // namespace: fileName,
+    // textKey: 'text',
   });
 };
 

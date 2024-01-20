@@ -1,4 +1,4 @@
-import { PineconeClient } from '@pinecone-database/pinecone';
+import { Pinecone } from '@pinecone-database/pinecone';
 import { NamespaceSummary } from '@pinecone-database/pinecone/dist/pinecone-generated-ts-fetch';
 
 if (!process.env.PINECONE_ENVIRONMENT || !process.env.PINECONE_API_KEY) {
@@ -7,11 +7,9 @@ if (!process.env.PINECONE_ENVIRONMENT || !process.env.PINECONE_API_KEY) {
 
 async function initPinecone() {
   try {
-    const pinecone = new PineconeClient();
-
-    await pinecone.init({
-      environment: process.env.PINECONE_ENVIRONMENT ?? '', //this is in the dashboard
+    const pinecone = new Pinecone({
       apiKey: process.env.PINECONE_API_KEY ?? '',
+      environment: process.env.PINECONE_ENVIRONMENT ?? '',
     });
 
     return pinecone;
@@ -23,13 +21,26 @@ async function initPinecone() {
 
 export const pinecone = await initPinecone();
 
-export const getPineconeIndex = async (client?: PineconeClient) => {
+export const getVanillaPineconeIndex = async (client?: Pinecone) => {
   // if no client has been initialized, initialize one
   const store = client || pinecone;
 
   try {
     const collections = await store.listIndexes();
-    const pineconeIndex = await store.Index(collections[0]);
+    // our tier will only have one index
+    const pineconeIndex = store.Index(collections[0].name);
+    
+    return pineconeIndex;
+  } catch (error) {
+    
+    console.log('error', error);
+    throw new Error('Failed to get Pinecone Index');
+  }
+}
+
+export const getPineconeIndex = async (client: Pinecone) => {
+  try {
+    const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX_NAME ?? '');
     
     return pineconeIndex;
   } catch (error) {
@@ -46,14 +57,17 @@ const namespaceExistsInIndex = (key: string, namespaces?: Record<string, Namespa
   return Object.keys(namespaces).includes(key);
 }
 
-export const getPineconeExistingNamespaces = async (fileName: string, client: PineconeClient) => {
-  const pineconeIndex = await getPineconeIndex(client);
-  try {
-    const idxDetails = await pineconeIndex.describeIndexStats({ describeIndexStatsRequest: { filter: {} }});
-    return namespaceExistsInIndex(fileName, idxDetails.namespaces);
-  } catch (error) {
-    console.log('error', error);
+/* 
+  Getting type errors due to outdated pinecone types
+*/
+// export const getPineconeExistingNamespaces = async (fileName: string, client: Pinecone) => {
+//   const pineconeIndex = await getPineconeIndex(client);
+//   try {
+//     const idxDetails = await pineconeIndex.describeIndexStats({ describeIndexStatsRequest: { filter: {} }});
+//     return namespaceExistsInIndex(fileName, idxDetails.namespaces);–
+//   } catch (error) {
+//     console.log('error', error);
     
-    throw new Error('Failed to get Pinecone Index');
-  }
-}
+//     throw new Error('Failed to get Pinecone Index');
+//   }
+// }

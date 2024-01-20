@@ -4,7 +4,7 @@ import { getErrorMessage } from '@/utils/misc';
 import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
 import { HNSWLib } from 'langchain/vectorstores/hnswlib';
 import { Document } from 'langchain/document';
-import { AIChatMessage, BaseChatMessage, HumanChatMessage } from 'langchain/schema';
+import { SystemMessage, BaseMessage, HumanMessage } from 'langchain/schema';
 import { getExistingDocs } from '@/utils/drizzle';
 
 
@@ -37,12 +37,12 @@ export default async function handler(
 
   // fix TypeError: chatMessage._getType is not a function
   // solution found here https://github.com/hwchase17/langchainjs/issues/1573#issuecomment-1582636486
-  const chatHistory: BaseChatMessage[] = [];
+  const chatHistory: BaseMessage[] = [];
   history?.forEach((_, idx) => {
     // first message is always human message
-    chatHistory.push(new HumanChatMessage(history[idx][0]));
+    chatHistory.push(new HumanMessage(history[idx][0]));
     // second message is always AI response
-    chatHistory.push(new AIChatMessage(history[idx][1]));
+    chatHistory.push(new SystemMessage(history[idx][1]));
   });
     
   try {
