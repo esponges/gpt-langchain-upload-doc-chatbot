@@ -29,13 +29,11 @@ const prompt = ChatPromptTemplate.fromMessages([
 // combine for simple LLM chain
 const chain = prompt.pipe(chatModel);
 
-const invocation = await chain.invoke({
+export const invocation = await chain.invoke({
   anyInputNameYouWantToPassIn: "what is LangSmith?",
 });
 
-console.log(invocation);
-
-// should now give a good answer since it knows what LangSmith is
+// might now hallucinate (depending its training data) a good answer in a technical documentation context
 /* AIMessage {
   lc_serializable: true,
   lc_kwargs: {
