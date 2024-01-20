@@ -1,9 +1,6 @@
-import { ChatOpenAI } from "@langchain/openai";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
-
-const chatModel = new ChatOpenAI({
-  openAIApiKey: process.env.OPENAI_API_KEY,
-});
+import { ChatOpenAI } from '@langchain/openai';
+import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { chatModel } from './common';
 
 // should not give a good answer since it doesn't know what LangSmith is
 // const newModel = await chatModel.invoke("what is LangSmith?");
@@ -22,15 +19,15 @@ const chatModel = new ChatOpenAI({
 
 // lets add a prompt template
 const prompt = ChatPromptTemplate.fromMessages([
-  ["system", "You are a world class technical documentation writer."],
-  ["user", "{anyInputNameYouWantToPassIn}"],
+  ['system', 'You are a world class technical documentation writer.'],
+  ['user', '{anyInputNameYouWantToPassIn}'],
 ]);
 
 // combine for simple LLM chain
 const chain = prompt.pipe(chatModel);
 
 export const invocation = await chain.invoke({
-  anyInputNameYouWantToPassIn: "what is LangSmith?",
+  anyInputNameYouWantToPassIn: 'what is LangSmith?',
 });
 
 // might now hallucinate (depending its training data) a good answer in a technical documentation context
@@ -46,3 +43,4 @@ export const invocation = await chain.invoke({
   additional_kwargs: { function_call: undefined, tool_calls: undefined }
 } */
 
+console.log(invocation.content);

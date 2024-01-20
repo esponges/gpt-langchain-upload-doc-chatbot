@@ -27,6 +27,7 @@
     "@microsoft/fetch-event-source": "^2.0.1",
     "@pinecone-database/pinecone": "^1.1.0",
     "@radix-ui/react-accordion": "^1.1.1",
+    "cheerio": "^1.0.0-rc.12",
     "clsx": "^1.2.1",
     "d3-dsv": "^2.0.0",
     "dotenv": "^16.0.3",
