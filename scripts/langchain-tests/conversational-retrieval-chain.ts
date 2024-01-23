@@ -2,7 +2,7 @@
 import { createHistoryAwareRetriever } from 'langchain/chains/history_aware_retriever';
 import { MessagesPlaceholder } from '@langchain/core/prompts';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { cheerioStore } from './vector-stores';
+import { CheerioStoreInstance } from './vector-stores';
 
 // prompt template for chatbot
 const historyAwarePrompt = ChatPromptTemplate.fromMessages([
@@ -14,7 +14,9 @@ const historyAwarePrompt = ChatPromptTemplate.fromMessages([
   ],
 ]);
 
-const retriever = cheerioStore.asRetriever();
+const cheerioStore = new CheerioStoreInstance();
+const vectorStore = await cheerioStore.getStore();
+const retriever = vectorStore.asRetriever();
 
 // chain
 const historyAwareRetrieverChain = await createHistoryAwareRetriever({
