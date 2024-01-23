@@ -70,8 +70,22 @@ const predition = await conversationalRetrievalChain.invoke({
   chat_history: [
     new HumanMessage('Can LangSmith help test my LLM applications?'),
     new AIMessage('Yes!'),
+    new HumanMessage('Tell me how!'),
+    new AIMessage('LangSmith can help test your LLM applications in several ways:\n' +
+    '\n' +
+    '1. Edit Examples: You can quickly edit examples and add them to datasets using LangSmith. This allows you to expand the surface area of your evaluation sets and fine-tune your model for improved quality or reduced costs.\n' +
+    '\n' +
+    '2. Monitor Application: LangSmith can be used to monitor your LLM application in a similar way as debugging. You can log traces, visualize latency and token usage statistics, and troubleshoot specific issues as they arise. You can also assign tags or metadata to each run, such as correlation IDs or AB test variants, and filter runs accordingly.\n' +
+    '\n' +
+    '3. Associate Feedback with Runs: You can programmatically associate feedback with runs in your application. If your application has a thumbs up/down button, for example, you can use it to log feedback back to LangSmith. This helps track performance over time and identify underperforming data points, which can then be added to a dataset for future testing.\n' +
+    '\n' +
+    '4. Debugging Support: LangSmith provides tools for debugging LLMs, chains, and agents. You can use it to identify issues such as unexpected end results, looping agents, slower chains, or token usage. LangSmith offers a visualization of the exact inputs and outputs of LLM calls, making it easier to understand and debug them.\n' +
+    '\n' +
+    '5. Playground for Prompt Editing: LangSmith includes a playground feature where you can modify prompts of LLM calls and observe the resulting changes to the output. This allows you to experiment and test different input variations without the hassle of copying prompts to external playgrounds.\n' +
+    '\n' +
+    'Overall, LangSmith simplifies the testing and debugging process for LLM applications, providing various tools and features to improve the quality and performance of your models.')
   ],
-  input: 'Tell me how!',
+  input: 'What was you first response to my question?',
 });
 
 console.log({ predition });
