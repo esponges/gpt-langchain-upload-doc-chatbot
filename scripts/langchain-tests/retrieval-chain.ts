@@ -3,6 +3,9 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { chatModel } from './common';
 import { CheerioStoreInstance } from './vector-stores';
 
+const getStore = async (storeName: string) => {
+
+
 // pass a propmt now
 const prompt =
   ChatPromptTemplate.fromTemplate(`Answer the following question based only on the provided context:
@@ -25,7 +28,7 @@ import { createRetrievalChain } from 'langchain/chains/retrieval';
 
 const cheerioStore = new CheerioStoreInstance();
 const vectorStore = await cheerioStore.getStore();
-export const retriever = vectorStore.asRetriever();
+const retriever = vectorStore.asRetriever();
 
 const retrievalChain = await createRetrievalChain({
   combineDocsChain: documentChain,
