@@ -1,10 +1,8 @@
 import { createStuffDocumentsChain } from 'langchain/chains/combine_documents';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { chatModel } from './common';
+import { createRetrievalChain } from 'langchain/chains/retrieval';
 import { CheerioStoreInstance } from './vector-stores';
-
-const getStore = async (storeName: string) => {
-
+import { chatModel } from './common';
 
 // pass a propmt now
 const prompt =
@@ -22,9 +20,6 @@ const documentChain = await createStuffDocumentsChain({
 });
 
 console.log({ documentChain });
-
-// use the vector store we've just created
-import { createRetrievalChain } from 'langchain/chains/retrieval';
 
 const cheerioStore = new CheerioStoreInstance();
 const vectorStore = await cheerioStore.getStore();
