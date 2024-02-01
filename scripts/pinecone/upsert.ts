@@ -2,10 +2,9 @@
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { getPineconeIndex, pinecone as pineconeClient } from '@/utils/pinecone';
 import { getErrorMessage } from '@/utils/misc';
-import { cities } from '../data/vector';
+import { cities, devAssessment } from '../data/vector';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const PINECONE_NAMESPACE = 'european-cities';
 
 // const configuration = new Configuration({
 //   apiKey: OPENAI_API_KEY,
@@ -24,14 +23,12 @@ const upsertVectorGroupInPineconeStore = async () => {
   const vectors = [];
   // create one vector per city
   // can create with map since it's async
-  for (const city of cities.toVectorize) {
-    const res = await embeddings.embedQuery(city);
+  for (const qn of devAssessment) {
+    const res = await embeddings.embedQuery(qn.content);
     vectors.push({
-      id: city,
+      id: qn.id,
       values: res,
-      metadata: {
-        city,
-      },
+      metadata: qn.metadata
     });
   }
 
