@@ -1,1 +1,2 @@
-import './upsert';
+// import './upsert';
+import './query';

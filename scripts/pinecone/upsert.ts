@@ -18,6 +18,7 @@ const PINECONE_NAMESPACE = 'european-cities';
 const upsertVectorGroupInPineconeStore = async () => {
   const embeddings = new OpenAIEmbeddings({
     openAIApiKey: OPENAI_API_KEY,
+    modelName: 'text-embedding-3-small',
   });
 
   const vectors = [];
