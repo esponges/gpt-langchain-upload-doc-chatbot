@@ -1,6 +1,10 @@
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { similarity } from "ml-distance";
+import { SemanticSimilarityExampleSelector } from "@langchain/core/example_selectors";
+import { Document } from 'langchain/document';
+import { chatModel } from "./common";
+import { PromptTemplate, FewShotPromptTemplate } from "@langchain/core/prompts";
 
 // {
 //   "title": "Full Stack Developer Assessment (Golang & React)",
@@ -124,5 +128,38 @@ const vectorStore = await MemoryVectorStore.fromTexts(
   { similarity: similarity.pearson }
 );
 
-const resultOne = await vectorStore.similaritySearch("level:easy type:react documents");
+const resultOne = await vectorStore.similaritySearch(
+  "level:easy type:react documents");
 console.log(resultOne);
+
+const similaritySelectorResult = await new SemanticSimilarityExampleSelector({
+  vectorStore,
+  filter: (doc: Document) => doc.metadata.level === "easy",
+});
+
+const model = chatModel;
+
+const examplePrompt = PromptTemplate.fromTemplate(`<example>
+  <user_input>
+    {query}
+  </user_input>
+  <output>
+    {output}
+  </output>
+</example>`);
+
+const dynamicPrompt = new FewShotPromptTemplate({
+  // We provide an ExampleSelector instead of examples.
+  // exampleSelector,
+  examplePrompt,
+  // prefix: `Answer the user's question, using the below examples as reference:`,
+  // suffix: "User question:\n{query}",
+  inputVariables: ["query"],
+});
+
+const chain = dynamicPrompt.pipe(model);
+const response = await chain.invoke({
+  query: "React fundamental concepts",
+});
+
+console.log(response);
